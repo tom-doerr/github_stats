@@ -206,7 +206,6 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     date_fmt = mdates.DateFormatter('%m-%d-%Y')
     ax.xaxis.set_major_formatter(date_fmt)
     _ = plt.xticks(rotation=90)
-    _ = plt.legend()
     _ = plt.title('Github stars over time')
     _ = plt.xlabel('Date')
     _ = plt.ylabel('Number of stars')
