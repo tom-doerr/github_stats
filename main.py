@@ -18,6 +18,9 @@ import datetime
 import time
 import pandas as pd
 import streamlit as st
+import json
+
+MAX_NUM_REPOS = None
 
 # Read auth token GITHUB_AUTH_TOKEN
 GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
@@ -27,9 +30,29 @@ username = st.sidebar.text_input('Enter Github username:')
 # username = 'tom-doerr'
 url = 'https://api.github.com/users/{}/repos'.format(username)
 headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN)}
-r = requests.get(url, headers=headers)
-reponames = [repo['name'] for repo in r.json()]
+
+
+return_dict = {}
+while True:
+    response = requests.get(url, headers=headers)
+    data = json.loads(response.text)
+    for repo in data:
+        return_dict[repo['name']] = repo
+    if 'next' not in response.links.keys():
+        break
+    else:
+        url = response.links['next']['url']
+
+
+# reponames = [repo['name'] for repo in data]
+reponames = list(return_dict.keys())
 print("reponames:", reponames)
+
+# r = requests.get(url, headers=headers)
+# reponames = [repo['name'] for repo in r.json()]
+# print("reponames:", reponames)
+
+
 
 # Get repo's star counts from Github API with the starred_at attribute using the v3 API.
 # https://developer.github.com/v3/activity/starring/#list-repositories-being-starred
@@ -50,7 +73,7 @@ def get_stars_over_time(reponames, username):
     '''
     stars_over_time = []
     repos_stared_at_lists = {}
-    for reponame in reponames[:4]:
+    for reponame in reponames[:MAX_NUM_REPOS]:
         url = 'https://api.github.com/repos/{}/{}/stargazers'.format(username, reponame)
         headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN),
                 'Accept': 'application/vnd.github.v3.star+json'}
@@ -72,12 +95,10 @@ def get_stars_over_time(reponames, username):
 
 
 # Plot stars over time
-def plot_stars_over_time(reponames, username):
+def plot_stars_over_time(reponames, username, repos_stared_at_lists):
     '''
     Plot stars over time.
     '''
-    repos_stared_at_lists = get_stars_over_time(reponames, username)
-    print("repos_stared_at_lists:", repos_stared_at_lists)
 
     # Plot stars over time
     plt.style.use('fivethirtyeight')
@@ -102,10 +123,46 @@ def plot_stars_over_time(reponames, username):
     st.pyplot(fig)
     # plt.show()
 
+def plot_stars_over_time_all(reponames, username, repos_stared_at_lists):
+    '''
+    Plot stars over time.
+    '''
+
+    # Plot stars over time
+    plt.style.use('fivethirtyeight')
+    fig, ax = plt.subplots()
+    fig.set_size_inches(11, 8)
+    dates_all = []
+    for reponame in repos_stared_at_lists.keys():
+        dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
+        dates_all.extend(dates)
+
+
+    # Sort the dates.
+    dates_all = sorted(dates_all)
+
+    y = [i for i, _ in enumerate(dates_all)]
+    ax.plot(dates_all, y)
+
+    # Format plot
+    date_fmt = mdates.DateFormatter('%m-%d-%Y')
+    ax.xaxis.set_major_formatter(date_fmt)
+    _ = plt.xticks(rotation=90)
+    _ = plt.legend()
+    _ = plt.title('Github stars over time')
+    _ = plt.xlabel('Date')
+    _ = plt.ylabel('Number of stars')
+
+    # Show plot in streamlit.
+    fig = ax.get_figure()
+    st.pyplot(fig)
+    # plt.show()
 
 def main():
-    plot_stars_over_time(reponames, username)
-
+    repos_stared_at_lists = get_stars_over_time(reponames, username)
+    print("repos_stared_at_lists:", repos_stared_at_lists)
+    plot_stars_over_time(reponames, username, repos_stared_at_lists)
+    plot_stars_over_time_all(reponames, username, repos_stared_at_lists)
 
 if __name__ == '__main__':
     main()
