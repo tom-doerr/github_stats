@@ -23,7 +23,7 @@ import json
 MAX_NUM_REPOS = None
 
 # Read auth token GITHUB_AUTH_TOKEN
-GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
+GITHUB_AUTH_TOKEN = st.secrets['github_auth_token']
 
 query_params = st.experimental_get_query_params()
 print("query_params:", query_params)
