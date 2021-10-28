@@ -95,7 +95,7 @@ r = requests.get(url, headers=headers)
 star_count = len(r.json())
 print('star_count:', star_count)
 
-@st.cache
+@st.cache(ttl=3600)
 def get_repo_stars(username, repo):
     '''
     Get all starred_at datetime values of a GitHub repo.
