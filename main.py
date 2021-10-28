@@ -30,7 +30,12 @@ print("query_params:", query_params)
 
 
 # Get user's repo names from Github API
-username = st.sidebar.text_input('Enter Github username:', query_params['username'][0])
+if 'username' in query_params:
+    username_default = query_params['username'][0]
+else:
+    username_default = ''
+
+username = st.sidebar.text_input('Enter Github username:', username_default)
 
 st.experimental_set_query_params(username=username)
 
