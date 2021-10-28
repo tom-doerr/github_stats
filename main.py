@@ -236,8 +236,25 @@ def convert_to_datetime(repos_stared_at_lists):
     for reponame, stared_list in repos_stared_at_lists.items():
         stared_list_datetime = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in stared_list]
         repos_stared_at_lists_datetime[reponame] = stared_list_datetime
+
     return repos_stared_at_lists_datetime
 
+
+def num_stars_received_last_x_hours(repos_stared_at_lists, hours=24):
+    '''
+    Get the number of stars received in the last x hours.
+    '''
+    repos_stared_at_lists_datetime_filtered = {}
+    now = datetime.datetime.now()
+    for reponame, stared_list in repos_stared_at_lists.items():
+        stared_list_filtered = [star_date for star_date in stared_list if now - star_date <= datetime.timedelta(hours=hours)]
+        repos_stared_at_lists_datetime_filtered[reponame] = stared_list_filtered
+
+    _sum = 0
+    for reponame, stared_list in repos_stared_at_lists_datetime_filtered.items():
+        _sum += len(stared_list)
+
+    return repos_stared_at_lists_datetime_filtered, _sum
 
 
 def main():
@@ -247,6 +264,11 @@ def main():
     repos_stared_at_filtered = filter_stared_list(repos_stared_at_lists, date_range)
     plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
+    num_stars_last_24_hours_repos, num_stars_last_24_hours_sum = num_stars_received_last_x_hours(repos_stared_at_lists, hours=24)
+    print("num_stars_last_24_hours_sum:", num_stars_last_24_hours_sum)
+    print("num_stars_last_24_hours_repos:", num_stars_last_24_hours_repos)
+    st.text("num_stars_last_24_hours_sum: {}".format(num_stars_last_24_hours_sum))
+
 
 if __name__ == '__main__':
     main()
