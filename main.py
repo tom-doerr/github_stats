@@ -269,6 +269,12 @@ def main():
     print("num_stars_last_24_hours_repos:", num_stars_last_24_hours_repos)
     st.text("num_stars_last_24_hours_sum: {}".format(num_stars_last_24_hours_sum))
 
+    stars_last_7_days = num_stars_received_last_x_hours(repos_stared_at_lists, hours=7*24)
+    stars_last_30_days = num_stars_received_last_x_hours(repos_stared_at_lists, hours=30*24)
+
+    st.text("stars_last_7_days: {}".format(stars_last_7_days[1]))
+    st.text("stars_last_30_days: {}".format(stars_last_30_days[1]))
+
 
 if __name__ == '__main__':
     main()
