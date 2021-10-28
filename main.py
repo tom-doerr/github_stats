@@ -225,7 +225,7 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     # Show plot in streamlit.
     fig = ax.get_figure()
     st.pyplot(fig)
-    # plt.show()
+
 
 def filter_stared_list(repos_stared_at_lists, date_range):
     '''
@@ -272,6 +272,12 @@ def num_stars_received_last_x_hours(repos_stared_at_lists, hours=24):
 def main():
     repos_stared_at_lists = get_stars_over_time(reponames, username)
     repos_stared_at_lists = convert_to_datetime(repos_stared_at_lists)
+    # Show total num stars for user.
+    total_stars = 0
+    for reponame, stared_list in repos_stared_at_lists.items():
+        total_stars += len(stared_list)
+    st.subheader('Total stars: {}'.format(total_stars))
+
     print("repos_stared_at_lists:", repos_stared_at_lists)
     repos_stared_at_filtered = filter_stared_list(repos_stared_at_lists, date_range)
     plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
