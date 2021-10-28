@@ -17,12 +17,14 @@ import numpy as np
 import datetime
 import time
 import pandas as pd
+import streamlit as st
 
 # Read auth token GITHUB_AUTH_TOKEN
 GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
 
 # Get user's repo names from Github API
-username = 'tom-doerr'
+username = st.sidebar.text_input('Enter Github username:')
+# username = 'tom-doerr'
 url = 'https://api.github.com/users/{}/repos'.format(username)
 headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN)}
 r = requests.get(url, headers=headers)
@@ -48,7 +50,7 @@ def get_stars_over_time(reponames, username):
     '''
     stars_over_time = []
     repos_stared_at_lists = {}
-    for reponame in reponames:
+    for reponame in reponames[:4]:
         url = 'https://api.github.com/repos/{}/{}/stargazers'.format(username, reponame)
         headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN),
                 'Accept': 'application/vnd.github.v3.star+json'}
@@ -94,7 +96,11 @@ def plot_stars_over_time(reponames, username):
     _ = plt.title('Github stars over time')
     _ = plt.xlabel('Date')
     _ = plt.ylabel('Number of stars')
-    plt.show()
+
+    # Show plot in streamlit.
+    fig = ax.get_figure()
+    st.pyplot(fig)
+    # plt.show()
 
 
 def main():
