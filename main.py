@@ -25,8 +25,15 @@ MAX_NUM_REPOS = None
 # Read auth token GITHUB_AUTH_TOKEN
 GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
 
+query_params = st.experimental_get_query_params()
+print("query_params:", query_params)
+
+
 # Get user's repo names from Github API
-username = st.sidebar.text_input('Enter Github username:')
+username = st.sidebar.text_input('Enter Github username:', query_params['username'][0])
+
+st.experimental_set_query_params(username=username)
+
 
 datetime_tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
 datetime_tomorrow_midnight = datetime.datetime(datetime_tomorrow.year,
