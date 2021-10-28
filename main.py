@@ -133,7 +133,7 @@ def get_stars_over_time(reponames, username):
 
 
 # Plot stars over time
-def plot_stars_over_time(reponames, username, repos_stared_at_lists):
+def plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered):
     '''
     Plot stars over time.
     '''
@@ -146,7 +146,14 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists):
         # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
         dates = repos_stared_at_lists[reponame]
         y = [i for i, _ in enumerate(repos_stared_at_lists[reponame])]
-        ax.plot(dates, y, label=reponame)
+        dates_filtered = []
+        y_filtered = []
+        for date, y_val in zip(dates, y):
+            if date in repos_stared_at_filtered[reponame]:
+                dates_filtered.append(date)
+                y_filtered.append(y_val)
+
+        ax.plot(dates_filtered, y_filtered, label=reponame)
 
     # Format plot
     date_fmt = mdates.DateFormatter('%m-%d-%Y')
@@ -165,7 +172,7 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists):
     st.pyplot(fig)
     # plt.show()
 
-def plot_stars_over_time_all(reponames, username, repos_stared_at_lists):
+def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered):
     '''
     Plot stars over time.
     '''
@@ -230,9 +237,9 @@ def main():
     repos_stared_at_lists = get_stars_over_time(reponames, username)
     repos_stared_at_lists = convert_to_datetime(repos_stared_at_lists)
     print("repos_stared_at_lists:", repos_stared_at_lists)
-    repos_stared_at_lists = filter_stared_list(repos_stared_at_lists, date_range)
-    plot_stars_over_time(reponames, username, repos_stared_at_lists)
-    plot_stars_over_time_all(reponames, username, repos_stared_at_lists)
+    repos_stared_at_filtered = filter_stared_list(repos_stared_at_lists, date_range)
+    plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
+    plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
 
 if __name__ == '__main__':
     main()
