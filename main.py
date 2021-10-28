@@ -74,6 +74,25 @@ r = requests.get(url, headers=headers)
 star_count = len(r.json())
 print('star_count:', star_count)
 
+def get_repo_stars(username, repo):
+    '''
+    Get all starred_at datetime values of a GitHub repo.
+    '''
+    starred_at = []
+    page = 1
+    headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN),
+            'Accept': 'application/vnd.github.v3.star+json'}
+    while True:
+        url = 'https://api.github.com/repos/' + username + '/' + repo + '/stargazers?page=' + str(page) 
+        r = requests.get(url, headers=headers)
+        page = page + 1
+        if len(r.json()) == 0:
+            break
+        print("r.json():", r.json())
+        for user in r.json():
+            starred_at.append(user['starred_at'])
+        time.sleep(0.5)
+    return starred_at
 
 # Plot stars over time
 def get_stars_over_time(reponames, username):
@@ -88,27 +107,9 @@ def get_stars_over_time(reponames, username):
         counter.text(f'Loading data for repo {repo_num} of {len(reponames)}...')
         repo_name_text.text(f'Processing {reponame}')
         repos_stared_at = []
-        url = 'https://api.github.com/repos/{}/{}/stargazers'.format(username, reponame)
-        while True:
-            headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN),
-                    'Accept': 'application/vnd.github.v3.star+json'}
-            r = requests.get(url, headers=headers)
-            star_counts = len(r.json())
-            print("r.json():", r.json())
-            stars_over_time.append(star_counts)
-            print('reponame:', reponame, 'star_count:', star_counts)
-            time.sleep(1)
+        star_dates_and_times = get_repo_stars(username, reponame)
 
-            # Parse json and get the time of when the repo was starred.
-            for repo in r.json():
-                repos_stared_at.append(repo['starred_at'])
-
-            if 'next' not in response.links.keys():
-                break
-            else:
-                url = response.links['next']['url']
-
-        repos_stared_at_lists[reponame] = repos_stared_at
+        repos_stared_at_lists[reponame] = star_dates_and_times
         print("repos_stared_at_lists:", repos_stared_at_lists)
 
     counter.text('')
