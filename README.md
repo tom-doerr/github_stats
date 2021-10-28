@@ -11,7 +11,7 @@ This app allows you to plot the number of Github stars received over time for a 
 ## How do I get the app?
 1. Clone the repo:
 ```
-git clone git@github.com:tomdoerr/github_stats.git
+git clone git@github.com:tom-doerr/github_stats.git
 ```
 2. Install the dependencies:
 ```
