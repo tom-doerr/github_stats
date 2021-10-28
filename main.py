@@ -28,6 +28,19 @@ GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
 # Get user's repo names from Github API
 username = st.sidebar.text_input('Enter Github username:')
 
+datetime_tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+datetime_tomorrow_midnight = datetime.datetime(datetime_tomorrow.year,
+                                               datetime_tomorrow.month,
+                                               datetime_tomorrow.day)
+
+# Add slider to sidebar that allows to select daterange.
+st.sidebar.markdown('**Date range**')
+date_range = st.sidebar.slider('Select date range:',
+    value=(datetime.datetime.strptime('2020-01-01', "%Y-%m-%d"),
+           datetime_tomorrow_midnight),
+    format='YYYY-MM-DD')
+
+
 # Prompt user to enter username if none is entered.
 if username == '':
     st.sidebar.text('Enter Github username in sidebar.')
@@ -35,6 +48,7 @@ if username == '':
     # stop
     st.warning('Please enter a Github username in the sidebar.')
     st.stop()
+
 
 # username = 'tom-doerr'
 url = 'https://api.github.com/users/{}/repos'.format(username)
@@ -74,6 +88,7 @@ r = requests.get(url, headers=headers)
 star_count = len(r.json())
 print('star_count:', star_count)
 
+@st.cache
 def get_repo_stars(username, repo):
     '''
     Get all starred_at datetime values of a GitHub repo.
@@ -128,7 +143,8 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists):
     fig, ax = plt.subplots()
     fig.set_size_inches(11, 8)
     for reponame in repos_stared_at_lists.keys():
-        dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
+        # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
+        dates = repos_stared_at_lists[reponame]
         y = [i for i, _ in enumerate(repos_stared_at_lists[reponame])]
         ax.plot(dates, y, label=reponame)
 
@@ -160,7 +176,8 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists):
     fig.set_size_inches(11, 8)
     dates_all = []
     for reponame in repos_stared_at_lists.keys():
-        dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
+        # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
+        dates = repos_stared_at_lists[reponame]
         dates_all.extend(dates)
 
 
@@ -184,9 +201,36 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists):
     st.pyplot(fig)
     # plt.show()
 
+def filter_stared_list(repos_stared_at_lists, date_range):
+    '''
+    Filter the stared list with the date range.
+    '''
+    print("date_range:", date_range)
+    print(type(date_range))
+    repos_stared_at_lists_filtered = {}
+    for reponame, stared_list in repos_stared_at_lists.items():
+        stared_list_filtered = [star_date for star_date in stared_list if star_date >= date_range[0] and star_date <= date_range[1]]
+        repos_stared_at_lists_filtered[reponame] = stared_list_filtered
+    return repos_stared_at_lists_filtered
+
+
+def convert_to_datetime(repos_stared_at_lists):
+    '''
+    Convert the dates in the stared list to datetime objects.
+    '''
+    repos_stared_at_lists_datetime = {}
+    for reponame, stared_list in repos_stared_at_lists.items():
+        stared_list_datetime = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in stared_list]
+        repos_stared_at_lists_datetime[reponame] = stared_list_datetime
+    return repos_stared_at_lists_datetime
+
+
+
 def main():
     repos_stared_at_lists = get_stars_over_time(reponames, username)
+    repos_stared_at_lists = convert_to_datetime(repos_stared_at_lists)
     print("repos_stared_at_lists:", repos_stared_at_lists)
+    repos_stared_at_lists = filter_stared_list(repos_stared_at_lists, date_range)
     plot_stars_over_time(reponames, username, repos_stared_at_lists)
     plot_stars_over_time_all(reponames, username, repos_stared_at_lists)
 
