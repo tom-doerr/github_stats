@@ -27,6 +27,15 @@ GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
 
 # Get user's repo names from Github API
 username = st.sidebar.text_input('Enter Github username:')
+
+# Prompt user to enter username if none is entered.
+if username == '':
+    st.sidebar.text('Enter Github username in sidebar.')
+    st.sidebar.markdown('**Example**: tom-doerr')
+    # stop
+    st.warning('Please enter a Github username in the sidebar.')
+    st.stop()
+
 # username = 'tom-doerr'
 url = 'https://api.github.com/users/{}/repos'.format(username)
 headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN)}
@@ -73,24 +82,37 @@ def get_stars_over_time(reponames, username):
     '''
     stars_over_time = []
     repos_stared_at_lists = {}
-    for reponame in reponames[:MAX_NUM_REPOS]:
-        url = 'https://api.github.com/repos/{}/{}/stargazers'.format(username, reponame)
-        headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN),
-                'Accept': 'application/vnd.github.v3.star+json'}
-        r = requests.get(url, headers=headers)
-        star_counts = len(r.json())
-        print("r.json():", r.json())
-        stars_over_time.append(star_counts)
-        print('reponame:', reponame, 'star_count:', star_counts)
-        time.sleep(1)
-
-        # Parse json and get the time of when the repo was starred.
+    counter = st.empty()
+    repo_name_text = st.empty()
+    for repo_num, reponame in enumerate(reponames[:MAX_NUM_REPOS]):
+        counter.text(f'Loading data for repo {repo_num} of {len(reponames)}...')
+        repo_name_text.text(f'Processing {reponame}')
         repos_stared_at = []
-        for repo in r.json():
-            repos_stared_at.append(repo['starred_at'])
+        url = 'https://api.github.com/repos/{}/{}/stargazers'.format(username, reponame)
+        while True:
+            headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN),
+                    'Accept': 'application/vnd.github.v3.star+json'}
+            r = requests.get(url, headers=headers)
+            star_counts = len(r.json())
+            print("r.json():", r.json())
+            stars_over_time.append(star_counts)
+            print('reponame:', reponame, 'star_count:', star_counts)
+            time.sleep(1)
+
+            # Parse json and get the time of when the repo was starred.
+            for repo in r.json():
+                repos_stared_at.append(repo['starred_at'])
+
+            if 'next' not in response.links.keys():
+                break
+            else:
+                url = response.links['next']['url']
+
         repos_stared_at_lists[reponame] = repos_stared_at
         print("repos_stared_at_lists:", repos_stared_at_lists)
 
+    counter.text('')
+    repo_name_text.text('')
     return repos_stared_at_lists
 
 
@@ -113,10 +135,13 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists):
     date_fmt = mdates.DateFormatter('%m-%d-%Y')
     ax.xaxis.set_major_formatter(date_fmt)
     _ = plt.xticks(rotation=90)
-    _ = plt.legend()
+    # _ = plt.legend()
     _ = plt.title('Github stars over time')
     _ = plt.xlabel('Date')
     _ = plt.ylabel('Number of stars')
+
+    # Show legend below plot.
+    _ = plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), shadow=True, ncol=2)
 
     # Show plot in streamlit.
     fig = ax.get_figure()
