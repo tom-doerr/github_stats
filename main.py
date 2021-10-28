@@ -165,7 +165,7 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stare
     _ = plt.ylabel('Number of stars')
 
     # Show legend below plot.
-    _ = plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), shadow=True, ncol=2)
+    _ = plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), shadow=True, ncol=2)
 
     # Show plot in streamlit.
     fig = ax.get_figure()
@@ -192,7 +192,15 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     dates_all = sorted(dates_all)
 
     y = [i for i, _ in enumerate(dates_all)]
-    ax.plot(dates_all, y)
+
+    dates_filtered = []
+    y_filtered = []
+    for date, y_val in zip(dates_all, y):
+        if date in repos_stared_at_filtered[reponame]:
+            dates_filtered.append(date)
+            y_filtered.append(y_val)
+
+    ax.plot(dates_filtered, y_filtered, label=reponame)
 
     # Format plot
     date_fmt = mdates.DateFormatter('%m-%d-%Y')
