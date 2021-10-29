@@ -208,9 +208,10 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     dates_filtered = []
     y_filtered = []
     for date, y_val in zip(dates_all, y):
-        if date in repos_stared_at_filtered[reponame]:
-            dates_filtered.append(date)
-            y_filtered.append(y_val)
+        for reponame in repos_stared_at_lists.keys():
+            if date in repos_stared_at_filtered[reponame]:
+                dates_filtered.append(date)
+                y_filtered.append(y_val)
 
     ax.plot(dates_filtered, y_filtered, label=reponame)
 
