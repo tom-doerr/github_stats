@@ -48,8 +48,9 @@ datetime_tomorrow_midnight = datetime.datetime(datetime_tomorrow.year,
 # Add slider to sidebar that allows to select daterange.
 st.sidebar.markdown('**Date range**')
 date_range = st.sidebar.slider('Select date range:',
-    value=(datetime.datetime.strptime('2020-01-01', "%Y-%m-%d"),
+    value=(datetime.datetime.strptime('2008-01-01', "%Y-%m-%d"),
            datetime_tomorrow_midnight),
+    min_value=datetime.datetime.strptime('2008-01-01', "%Y-%m-%d"),
     format='YYYY-MM-DD')
 
 
