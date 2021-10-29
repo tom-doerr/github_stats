@@ -36,6 +36,7 @@ else:
     username_default = ''
 
 username = st.sidebar.text_input('Enter Github username:', username_default)
+username = username.strip()
 
 st.experimental_set_query_params(username=username)
 
