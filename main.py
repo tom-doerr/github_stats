@@ -374,6 +374,90 @@ def num_stars_received_last_x_hours(repos_stared_at_lists, hours=24):
     return repos_stared_at_lists_datetime_filtered, _sum
 
 
+def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, repos_stared_at_filtered):
+    '''
+    Plot the stars received in the last x hours for each repo using plotly.
+    '''
+    import plotly.graph_objects as go
+
+
+    # Sort repos by number of stars.
+    repo_stars_received_last_x_hours = []
+    for reponame in repos_stared_at_lists.keys():
+        stared_list_filtered, _sum = num_stars_received_last_x_hours(repos_stared_at_filtered, hours=24)
+        repo_stars_received_last_x_hours.append((reponame, _sum))
+
+    # Sort repos by number of stars.
+    repos_ordered = sorted(repos_stared_at_lists.keys(), key=lambda x: len(repos_stared_at_lists[x]), reverse=True)
+
+    for repo_num, reponame in enumerate(repos_ordered[:MAX_NUM_REPOS]):
+        # Skip if no stars.
+        num_stars = len(repos_stared_at_filtered[reponame])
+        if num_stars == 0:
+            continue
+        fig = go.Figure()
+        print('repo_num:', repo_num)
+        print('reponame:', reponame)
+        st.subheader(f'{reponame}')
+
+
+        dates = repos_stared_at_lists[reponame]
+        y = [i for i, _ in enumerate(repos_stared_at_lists[reponame])]
+        dates_filtered = []
+        y_filtered = []
+        for date, y_val in zip(dates, y):
+            if date in repos_stared_at_filtered[reponame]:
+                dates_filtered.append(date)
+                y_filtered.append(y_val)
+
+        # plot using a line plot
+
+        # fig = px.line(x=repos_stared_at_lists_datetime_filtered[reponame], y=np.arange(num_stars), title='Stars over time')
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=dates_filtered, y=y_filtered, name=reponame))
+        fig.update_xaxes(nticks=20)
+        # st.plotly_chart(fig)
+
+        # Remove borders.
+        fig.update_layout(
+            margin=dict(l=0, r=0, t=0, b=0),
+            paper_bgcolor="white",
+        )
+
+        # Move legend below plot
+        fig.update_layout(legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01
+        ))
+
+        st.plotly_chart(fig)
+
+
+
+    # for reponame in repos_stared_at_lists_datetime_filtered_sorted:
+        # # Check if repo has stars.
+        # if len(repos_stared_at_lists_datetime_filtered[reponame]) == 0:
+            # continue
+        # fig = go.Figure()
+        # fig.add_trace(go.Scatter(x=[star_date.strftime("%d-%b-%Y %H:%M:%S") for star_date in repos_stared_at_lists_datetime_filtered[reponame]],
+                                # y=[i for i, _ in enumerate(repos_stared_at_lists_datetime_filtered[reponame])],
+                                # mode='markers',
+                                # name=reponame))
+
+        # # Show plot in streamlit.
+        # fig.update_layout(
+            # margin=dict(l=0, r=0, t=0, b=0),
+            # paper_bgcolor="white",
+        # )
+        # fig.update_xaxes(nticks=20)
+
+        # st.plotly_chart(fig)
+
+
+
+# st.title('Github stars over time')
 def main():
     repos_stared_at_lists = get_stars_over_time(reponames, username)
     repos_stared_at_lists = convert_to_datetime(repos_stared_at_lists)
@@ -388,8 +472,6 @@ def main():
     plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     num_stars_last_24_hours_repos, num_stars_last_24_hours_sum = num_stars_received_last_x_hours(repos_stared_at_lists, hours=24)
-    print("num_stars_last_24_hours_sum:", num_stars_last_24_hours_sum)
-    print("num_stars_last_24_hours_repos:", num_stars_last_24_hours_repos)
     st.text("num_stars_last_24_hours_sum: {}".format(num_stars_last_24_hours_sum))
 
     stars_last_7_days = num_stars_received_last_x_hours(repos_stared_at_lists, hours=7*24)
@@ -397,6 +479,8 @@ def main():
 
     st.text("stars_last_7_days: {}".format(stars_last_7_days[1]))
     st.text("stars_last_30_days: {}".format(stars_last_30_days[1]))
+
+    plot_stars_repos_individually(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
 
 
 if __name__ == '__main__':
