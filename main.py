@@ -38,7 +38,7 @@ else:
 username = st.sidebar.text_input('Enter Github username:', username_default)
 username = username.strip()
 
-st.experimental_set_query_params(username=username)
+# st.experimental_set_query_params(username=username)
 
 
 datetime_tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
@@ -46,13 +46,53 @@ datetime_tomorrow_midnight = datetime.datetime(datetime_tomorrow.year,
                                                datetime_tomorrow.month,
                                                datetime_tomorrow.day)
 
+if 'num_days' in query_params:
+    num_days_default = query_params['num_days'][0]
+else:
+    num_days_default = ''
+
+# Get x number of days to show.
+num_days = st.sidebar.text_input('Enter number of days to show:', num_days_default)
+
+if num_days:
+    datetime_start = datetime.datetime.now() - datetime.timedelta(days=int(num_days))
+    datetime_end = datetime.datetime.now()
+else:
+
+    if 'datetime_start' in query_params:
+        datetime_start_str = query_params['datetime_start'][0]
+        datetime_start = datetime.datetime.strptime(datetime_start_str, "%Y-%m-%d %H:%M:%S")
+    else:
+        datetime_start = datetime.datetime.strptime('2008-01-01', "%Y-%m-%d")
+
+
+    if 'datetime_end' in query_params:
+        datetime_end_str = query_params['datetime_end'][0]
+        print("datetime_end_str:", datetime_end_str)
+        datetime_end = datetime.datetime.strptime(datetime_end_str, "%Y-%m-%d %H:%M:%S")
+    else:
+        datetime_end = datetime_tomorrow_midnight
+
+
+
+
 # Add slider to sidebar that allows to select daterange.
 st.sidebar.markdown('**Date range**')
 date_range = st.sidebar.slider('Select date range:',
-    value=(datetime.datetime.strptime('2008-01-01', "%Y-%m-%d"),
-           datetime_tomorrow_midnight),
+    value=(datetime_start,
+           datetime_end),
     min_value=datetime.datetime.strptime('2008-01-01', "%Y-%m-%d"),
+    max_value=datetime_tomorrow_midnight,
     format='YYYY-MM-DD')
+
+
+datetime_start, datetime_end = date_range
+datetime_start_str = datetime_start.strftime("%Y-%m-%d %H:%M:%S")
+datetime_end_str = datetime_end.strftime("%Y-%m-%d %H:%M:%S")
+st.experimental_set_query_params(datetime_start=datetime_start_str,
+                                 datetime_end=datetime_end_str,
+                                 num_days=num_days,
+                                    username=username)
 
 
 # Prompt user to enter username if none is entered.
@@ -83,7 +123,6 @@ while True:
 
 # reponames = [repo['name'] for repo in data]
 reponames = list(return_dict.keys())
-print("reponames:", reponames)
 
 # r = requests.get(url, headers=headers)
 # reponames = [repo['name'] for repo in r.json()]
