@@ -19,6 +19,8 @@ import time
 import pandas as pd
 import streamlit as st
 import json
+import plotly.express as px
+
 
 MAX_NUM_REPOS = None
 
@@ -206,6 +208,7 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stare
 
         ax.plot(dates_filtered, y_filtered, label=reponame)
 
+
     # Format plot
     date_fmt = mdates.DateFormatter('%m-%d-%Y')
     ax.xaxis.set_major_formatter(date_fmt)
@@ -222,6 +225,55 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stare
     fig = ax.get_figure()
     st.pyplot(fig)
     # plt.show()
+
+
+def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repos_stared_at_filtered):
+    '''
+    Plot stars over time using Plotly.
+    '''
+    import plotly.graph_objects as go
+
+    # Plot stars over time
+    fig = go.Figure()
+    for reponame in repos_stared_at_lists.keys():
+        # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
+        dates = repos_stared_at_lists[reponame]
+        y = [i for i, _ in enumerate(repos_stared_at_lists[reponame])]
+        dates_filtered = []
+        y_filtered = []
+        for date, y_val in zip(dates, y):
+            if date in repos_stared_at_filtered[reponame]:
+                dates_filtered.append(date)
+                y_filtered.append(y_val)
+
+        fig.add_trace(go.Scatter(x=dates_filtered, y=y_filtered, name=reponame))
+
+
+    # Remove borders.
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=0, b=0),
+        paper_bgcolor="white",
+    )
+
+    # Move legend below plot
+    fig.update_layout(legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01
+    ))
+    st.plotly_chart(fig)
+
+
+
+
+
+
+
+
+
+
+
 
 def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered):
     '''
@@ -265,6 +317,15 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     # Show plot in streamlit.
     fig = ax.get_figure()
     st.pyplot(fig)
+
+
+    # Same plot as above but using plotly.
+    fig = px.line(x=    dates_filtered, y=y_filtered, title='Github stars over time')
+    fig.update_xaxes(nticks=20)
+    st.plotly_chart(fig)
+
+
+
 
 
 def filter_stared_list(repos_stared_at_lists, date_range):
@@ -318,6 +379,7 @@ def main():
 
     repos_stared_at_filtered = filter_stared_list(repos_stared_at_lists, date_range)
     plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
+    plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     num_stars_last_24_hours_repos, num_stars_last_24_hours_sum = num_stars_received_last_x_hours(repos_stared_at_lists, hours=24)
     print("num_stars_last_24_hours_sum:", num_stars_last_24_hours_sum)
