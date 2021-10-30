@@ -328,6 +328,10 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     # Same plot as above but using plotly.
     fig = px.line(x=    dates_filtered, y=y_filtered, title='Github stars over time')
     fig.update_xaxes(nticks=20)
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=0, b=0),
+        paper_bgcolor="white",
+    )
     st.plotly_chart(fig)
 
 
