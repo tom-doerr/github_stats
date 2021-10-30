@@ -262,6 +262,10 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
         xanchor="left",
         x=0.01
     ))
+
+
+
+
     st.plotly_chart(fig)
 
 
@@ -304,19 +308,21 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
                 dates_filtered.append(date)
                 y_filtered.append(y_val)
 
-    ax.plot(dates_filtered, y_filtered, label=reponame)
 
-    # Format plot
-    date_fmt = mdates.DateFormatter('%m-%d-%Y')
-    ax.xaxis.set_major_formatter(date_fmt)
-    _ = plt.xticks(rotation=90)
-    _ = plt.title('Github stars over time')
-    _ = plt.xlabel('Date')
-    _ = plt.ylabel('Number of stars')
+    if False:
+        ax.plot(dates_filtered, y_filtered, label=reponame)
 
-    # Show plot in streamlit.
-    fig = ax.get_figure()
-    st.pyplot(fig)
+        # Format plot
+        date_fmt = mdates.DateFormatter('%m-%d-%Y')
+        ax.xaxis.set_major_formatter(date_fmt)
+        _ = plt.xticks(rotation=90)
+        _ = plt.title('Github stars over time')
+        _ = plt.xlabel('Date')
+        _ = plt.ylabel('Number of stars')
+
+        # Show plot in streamlit.
+        fig = ax.get_figure()
+        st.pyplot(fig)
 
 
     # Same plot as above but using plotly.
@@ -378,7 +384,7 @@ def main():
     st.subheader('Total stars: {}'.format(total_stars))
 
     repos_stared_at_filtered = filter_stared_list(repos_stared_at_lists, date_range)
-    plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
+    # plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     num_stars_last_24_hours_repos, num_stars_last_24_hours_sum = num_stars_received_last_x_hours(repos_stared_at_lists, hours=24)
