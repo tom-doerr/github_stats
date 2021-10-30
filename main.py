@@ -332,6 +332,12 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
         margin=dict(l=0, r=0, t=0, b=0),
         paper_bgcolor="white",
     )
+    # Remove x and y text
+    fig.update_layout(
+        xaxis_title="",
+        yaxis_title="",
+    )
+
     st.plotly_chart(fig)
 
 
