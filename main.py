@@ -117,7 +117,6 @@ def get_repo_stars(username, repo):
         page = page + 1
         if len(r.json()) == 0:
             break
-        print("r.json():", r.json())
         for user in r.json():
             starred_at.append(user['starred_at'])
         time.sleep(0.5)
@@ -139,7 +138,6 @@ def get_stars_over_time(reponames, username):
         star_dates_and_times = get_repo_stars(username, reponame)
 
         repos_stared_at_lists[reponame] = star_dates_and_times
-        print("repos_stared_at_lists:", repos_stared_at_lists)
 
     counter.text('')
     repo_name_text.text('')
@@ -234,8 +232,6 @@ def filter_stared_list(repos_stared_at_lists, date_range):
     '''
     Filter the stared list with the date range.
     '''
-    print("date_range:", date_range)
-    print(type(date_range))
     repos_stared_at_lists_filtered = {}
     for reponame, stared_list in repos_stared_at_lists.items():
         stared_list_filtered = [star_date for star_date in stared_list if star_date >= date_range[0] and star_date <= date_range[1]]
@@ -281,7 +277,6 @@ def main():
         total_stars += len(stared_list)
     st.subheader('Total stars: {}'.format(total_stars))
 
-    print("repos_stared_at_lists:", repos_stared_at_lists)
     repos_stared_at_filtered = filter_stared_list(repos_stared_at_lists, date_range)
     plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
