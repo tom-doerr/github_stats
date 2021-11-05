@@ -198,7 +198,7 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stare
     for reponame in repos_stared_at_lists.keys():
         # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
         dates = repos_stared_at_lists[reponame]
-        y = [i for i, _ in enumerate(repos_stared_at_lists[reponame])]
+        y = [i + 1 for i, _ in enumerate(repos_stared_at_lists[reponame])]
         dates_filtered = []
         y_filtered = []
         for date, y_val in zip(dates, y):
@@ -238,7 +238,7 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
     for reponame in repos_stared_at_lists.keys():
         # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
         dates = repos_stared_at_lists[reponame]
-        y = [i for i, _ in enumerate(repos_stared_at_lists[reponame])]
+        y = [i + 1 for i, _ in enumerate(repos_stared_at_lists[reponame])]
         dates_filtered = []
         y_filtered = []
         for date, y_val in zip(dates, y):
@@ -298,7 +298,7 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     # Sort the dates.
     dates_all = sorted(dates_all)
 
-    y = [i for i, _ in enumerate(dates_all)]
+    y = [i + 1 for i, _ in enumerate(dates_all)]
 
     dates_filtered = []
     y_filtered = []
@@ -412,7 +412,7 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
 
 
         dates = repos_stared_at_lists[reponame]
-        y = [i for i, _ in enumerate(repos_stared_at_lists[reponame])]
+        y = [i + 1 for i, _ in enumerate(repos_stared_at_lists[reponame])]
         dates_filtered = []
         y_filtered = []
         for date, y_val in zip(dates, y):
