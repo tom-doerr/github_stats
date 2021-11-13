@@ -2,7 +2,7 @@
 <p align="center">
     <img src='screenshot.png'>
     <p align="center">
-        [Website](https://share.streamlit.io/tom-doerr/github_stats/main/main.py?username=tom-doerr)
+        Website: https://share.streamlit.io/tom-doerr/github_stats/main/main.py?username=tom-doerr
     </p>
 </p>
 
