@@ -1,6 +1,13 @@
-# github_stats 📈
-![Screenshot](screenshot.png)
-[Website](https://share.streamlit.io/tom-doerr/github_stats/main/main.py?username=tom-doerr)
+<h1 align="center"> 📈 github_stats </h1>
+<p align="center">
+    <img src='screenshot.png'>
+    <p align="center">
+        [Website](https://share.streamlit.io/tom-doerr/github_stats/main/main.py?username=tom-doerr)
+    </p>
+</p>
+
+
+
 ## What is it?
 This app allows you to plot the number of Github stars received over time for a user.
 ## How do I use it?
