@@ -1,4 +1,4 @@
-# github_stats
+# github_stats 📈
 ![Screenshot](screenshot.png)
 [Website](https://share.streamlit.io/tom-doerr/github_stats/main/main.py?username=tom-doerr)
 ## What is it?
