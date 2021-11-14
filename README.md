@@ -31,3 +31,8 @@ pip install -r requirements.txt
 streamlit run github_stats/main.py
 ```
 
+## Rate Limits
+You can increase your rate limit by creating a directory `.streamlit` in the project root and adding the file `.streamlit/secrets.toml` containing your github auth token:
+```
+github_auth_token = "..."
+```
