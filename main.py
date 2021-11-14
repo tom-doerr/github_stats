@@ -24,8 +24,25 @@ import plotly.express as px
 
 MAX_NUM_REPOS = None
 
-# Read auth token GITHUB_AUTH_TOKEN
-GITHUB_AUTH_TOKEN = st.secrets['github_auth_token']
+
+def check_rate_limit_exceeded(json_response):
+    if 'message' in json_response and 'rate limit exceeded' in json_response['message']:
+        print(json_response['message'])
+        # print in streamlit as error
+        st.error(json_response['message'])
+        # stop
+        st.stop()
+
+# check if ./streamlit/secrets.toml exists
+if os.path.exists('./.streamlit/secrets.toml'):
+    # read GITHUB_AUTH_TOKEN from secrets.toml
+    GITHUB_AUTH_TOKEN = st.secrets['github_auth_token']
+else:
+    # read GITHUB_AUTH_TOKEN from environment variable
+    if 'GITHUB_AUTH_TOKEN' in os.environ:
+        GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
+    else:
+        GITHUB_AUTH_TOKEN = None
 
 query_params = st.experimental_get_query_params()
 print("query_params:", query_params)
@@ -70,7 +87,6 @@ else:
 
     if 'datetime_end' in query_params:
         datetime_end_str = query_params['datetime_end'][0]
-        print("datetime_end_str:", datetime_end_str)
         datetime_end = datetime.datetime.strptime(datetime_end_str, "%Y-%m-%d %H:%M:%S")
     else:
         datetime_end = datetime_tomorrow_midnight
@@ -106,15 +122,18 @@ if username == '':
     st.stop()
 
 
-# username = 'tom-doerr'
 url = 'https://api.github.com/users/{}/repos'.format(username)
-headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN)}
+if GITHUB_AUTH_TOKEN:
+    headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN)}
+else:
+    headers = {}
 
 
 return_dict = {}
 while True:
     response = requests.get(url, headers=headers)
     data = json.loads(response.text)
+    check_rate_limit_exceeded(data)
     for repo in data:
         return_dict[repo['name']] = repo
     if 'next' not in response.links.keys():
@@ -123,22 +142,11 @@ while True:
         url = response.links['next']['url']
 
 
-# reponames = [repo['name'] for repo in data]
 reponames = list(return_dict.keys())
-
-# r = requests.get(url, headers=headers)
-# reponames = [repo['name'] for repo in r.json()]
-# print("reponames:", reponames)
-
 
 
 # Get repo's star counts from Github API with the starred_at attribute using the v3 API.
-# https://developer.github.com/v3/activity/starring/#list-repositories-being-starred
-# https://api.github.com/repos/:owner/:repo/stargazers
-# https://api.github.com/repos/tom-doerr/test_api_repo/stargazers
-# https://api.github.com/users/tom-doerr/starred
 url = 'https://api.github.com/repos/{}/{}/stargazers'.format(username, reponames[0])
-headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN)}
 r = requests.get(url, headers=headers)
 star_count = len(r.json())
 print('star_count:', star_count)
@@ -150,14 +158,16 @@ def get_repo_stars(username, repo):
     '''
     starred_at = []
     page = 1
-    headers = {'Authorization': 'token {}'.format(GITHUB_AUTH_TOKEN),
-            'Accept': 'application/vnd.github.v3.star+json'}
+    # copy headers to headers_accept
+    headers_accept = headers.copy()
+    headers_accept['Accept'] = 'application/vnd.github.v3.star+json'
     while True:
         url = 'https://api.github.com/repos/' + username + '/' + repo + '/stargazers?page=' + str(page) 
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers_accept)
         page = page + 1
         if len(r.json()) == 0:
             break
+        check_rate_limit_exceeded(r.json())
         for user in r.json():
             starred_at.append(user['starred_at'])
         time.sleep(0.5)
@@ -196,7 +206,6 @@ def plot_stars_over_time(reponames, username, repos_stared_at_lists, repos_stare
     fig, ax = plt.subplots()
     fig.set_size_inches(11, 8)
     for reponame in repos_stared_at_lists.keys():
-        # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
         dates = repos_stared_at_lists[reponame]
         y = [i + 1 for i, _ in enumerate(repos_stared_at_lists[reponame])]
         dates_filtered = []
@@ -236,7 +245,6 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
     # Plot stars over time
     fig = go.Figure()
     for reponame in repos_stared_at_lists.keys():
-        # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
         dates = repos_stared_at_lists[reponame]
         y = [i + 1 for i, _ in enumerate(repos_stared_at_lists[reponame])]
         dates_filtered = []
@@ -406,8 +414,6 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
         if num_stars == 0:
             continue
         fig = go.Figure()
-        print('repo_num:', repo_num)
-        print('reponame:', reponame)
         st.subheader(f'{reponame}')
 
 
