@@ -73,8 +73,13 @@ else:
 # Get x number of days to show.
 num_days = st.sidebar.text_input('Enter number of days to show:', num_days_default)
 
+datetime_today = datetime.datetime.now()
+datetime_today_midnight = datetime.datetime(datetime_today.year,
+                                               datetime_today.month,
+                                               datetime_today.day)
 if num_days:
-    datetime_start = datetime.datetime.now() - datetime.timedelta(days=int(num_days))
+    # datetime_start = datetime.datetime.now() - datetime.timedelta(days=int(num_days))
+    datetime_start = datetime_today_midnight - datetime.timedelta(days=int(num_days))
     datetime_end = datetime.datetime.now()
 else:
 
