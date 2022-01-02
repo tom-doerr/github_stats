@@ -80,7 +80,7 @@ datetime_today_midnight = datetime.datetime(datetime_today.year,
 if num_days:
     # datetime_start = datetime.datetime.now() - datetime.timedelta(days=int(num_days))
     datetime_start = datetime_today_midnight - datetime.timedelta(days=int(num_days))
-    datetime_end = datetime.datetime.now()
+    datetime_end = datetime_today_midnight
 else:
 
     if 'datetime_start' in query_params:
