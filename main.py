@@ -264,7 +264,6 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
     # Remove borders.
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
-        paper_bgcolor="white",
     )
 
     # Move legend below plot
@@ -275,6 +274,7 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
         x=0.01
     ))
 
+    # fig.update_layout(template="plotly_dark")
 
 
 
@@ -342,7 +342,6 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     fig.update_xaxes(nticks=20)
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
-        paper_bgcolor="white",
     )
     # Remove x and y text
     fig.update_layout(
@@ -441,7 +440,6 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
         # Remove borders.
         fig.update_layout(
             margin=dict(l=0, r=0, t=0, b=0),
-            paper_bgcolor="white",
         )
 
         # Move legend below plot
