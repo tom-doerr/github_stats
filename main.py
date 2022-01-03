@@ -441,7 +441,7 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
         # fig = px.line(x=repos_stared_at_lists_datetime_filtered[reponame], y=np.arange(num_stars), title='Stars over time')
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=dates_filtered, y=y_filtered, name=reponame))
-        fig.update_xaxes(nticks=20)
+        # fig.update_xaxes(nticks=20)
         # st.plotly_chart(fig)
 
         # Remove borders.
