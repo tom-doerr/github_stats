@@ -20,6 +20,7 @@ import pandas as pd
 import streamlit as st
 import json
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 MAX_NUM_REPOS = None
@@ -244,7 +245,6 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
     '''
     Plot stars over time using Plotly.
     '''
-    import plotly.graph_objects as go
 
     # Plot stars over time
     fig = go.Figure()
@@ -338,16 +338,24 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
 
 
     # Same plot as above but using plotly.
-    fig = px.line(x=    dates_filtered, y=y_filtered, title='Github stars over time')
-    fig.update_xaxes(nticks=20)
+    # fig = px.line(x=    dates_filtered, y=y_filtered, title='Github stars over time')
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=dates_filtered, y=y_filtered))
+    # fig.update_xaxes(nticks=20)
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
     )
     # Remove x and y text
-    fig.update_layout(
-        xaxis_title="",
-        yaxis_title="",
-    )
+    # fig.update_layout(
+        # xaxis_title="",
+        # yaxis_title="",
+    # )
+    # fig.update_layout(legend=dict(
+        # yanchor="top",
+        # y=0.99,
+        # xanchor="left",
+        # x=0.01
+    # ))
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -399,7 +407,6 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
     '''
     Plot the stars received in the last x hours for each repo using plotly.
     '''
-    import plotly.graph_objects as go
 
 
     # Sort repos by number of stars.
