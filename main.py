@@ -497,13 +497,16 @@ def main():
     plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
     num_stars_last_24_hours_repos, num_stars_last_24_hours_sum = num_stars_received_last_x_hours(repos_stared_at_lists, hours=24)
-    st.text("num_stars_last_24_hours_sum: {}".format(num_stars_last_24_hours_sum))
+    # st.text("num_stars_last_24_hours_sum: {}".format(num_stars_last_24_hours_sum))
+    st.text('Number of stars received in the last 24 hours: {}'.format(num_stars_last_24_hours_sum))
 
     stars_last_7_days = num_stars_received_last_x_hours(repos_stared_at_lists, hours=7*24)
     stars_last_30_days = num_stars_received_last_x_hours(repos_stared_at_lists, hours=30*24)
 
-    st.text("stars_last_7_days: {}".format(stars_last_7_days[1]))
-    st.text("stars_last_30_days: {}".format(stars_last_30_days[1]))
+    # st.text("stars_last_7_days: {}".format(stars_last_7_days[1]))
+    st.text('Number of stars received in the last 7 days: {}'.format(stars_last_7_days[1]))
+    # st.text("stars_last_30_days: {}".format(stars_last_30_days[1]))
+    st.text('Number of stars received in the last 30 days: {}'.format(stars_last_30_days[1]))
 
     plot_stars_repos_individually(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
 
