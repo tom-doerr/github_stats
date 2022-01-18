@@ -1,4 +1,34 @@
 <h1 align="center"> 📈 github_stats </h1>
+
+
+<p align="center">
+    <a href="https://github.com/tom-doerr/github_stats/stargazers"
+        ><img
+            src="https://img.shields.io/github/stars/tom-doerr/github_stats?colorA=2c2837&colorB=c9cbff&style=for-the-badge&logo=starship style=flat-square"
+            alt="Repository's starts"
+    /></a>
+    <a href="https://github.com/tom-doerr/github_stats/issues"
+        ><img
+            src="https://img.shields.io/github/issues-raw/tom-doerr/github_stats?colorA=2c2837&colorB=f2cdcd&style=for-the-badge&logo=starship style=flat-square"
+            alt="Issues"
+    /></a>
+    <a href="https://github.com/tom-doerr/github_stats/blob/main/LICENSE"
+        ><img
+            src="https://img.shields.io/github/license/tom-doerr/github_stats?colorA=2c2837&colorB=b5e8e0&style=for-the-badge&logo=starship style=flat-square"
+            alt="License"
+    /><br />
+    <a href="https://github.com/tom-doerr/github_stats/commits/main"
+		><img
+			src="https://img.shields.io/github/last-commit/tom-doerr/github_stats/main?colorA=2c2837&colorB=ddb6f2&style=for-the-badge&logo=starship style=flat-square"
+			alt="Latest commit"
+    /></a>
+    <a href="https://github.com/tom-doerr/github_stats"
+        ><img
+            src="https://img.shields.io/github/repo-size/tom-doerr/github_stats?colorA=2c2837&colorB=89DCEB&style=for-the-badge&logo=starship style=flat-square"
+            alt="GitHub repository size"
+    /></a>
+</p>
+
 <p align="center">
     <img src='screenshot.png'>
     <p align="center">
