@@ -156,7 +156,7 @@ r = requests.get(url, headers=headers)
 star_count = len(r.json())
 print('star_count:', star_count)
 
-@st.cache(ttl=3600)
+@st.cache(show_spinner=False, ttl=3600)
 def get_repo_stars(username, repo):
     '''
     Get all starred_at datetime values of a GitHub repo.
@@ -179,7 +179,7 @@ def get_repo_stars(username, repo):
     return starred_at
 
 # Plot stars over time
-@st.cache(ttl=3600, suppress_st_warning=True)
+@st.cache(show_spinner=False, ttl=3600, suppress_st_warning=True)
 def get_stars_over_time(reponames, username):
     '''
     Get the number of stars for each repo in reponames over time.
@@ -364,7 +364,7 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
 
 
 
-@st.cache(ttl=3600)
+@st.cache(show_spinner=False, ttl=3600)
 def filter_stared_list(repos_stared_at_lists, date_range):
     '''
     Filter the stared list with the date range.
@@ -376,7 +376,7 @@ def filter_stared_list(repos_stared_at_lists, date_range):
     return repos_stared_at_lists_filtered
 
 
-@st.cache(ttl=3600)
+@st.cache(show_spinner=False, ttl=3600)
 def convert_to_datetime(repos_stared_at_lists):
     '''
     Convert the dates in the stared list to datetime objects.
