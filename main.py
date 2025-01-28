@@ -163,7 +163,7 @@ def get_repo_stars_page(username: str, repo: str, page: int, headers_accept: Dic
     check_rate_limit_exceeded(data)
     return [user['starred_at'] for user in data] if data else []
 
-@st.cache(show_spinner=False, ttl=3600)
+@st.cache_data(show_spinner=False, ttl=3600)
 def get_repo_stars(username: str, repo: str) -> List[str]:
     starred_at = []
     headers_accept = headers.copy()
@@ -200,7 +200,7 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     return starred_at
 
 # Plot stars over time
-@st.cache(show_spinner=False, ttl=3600, suppress_st_warning=True)
+@st.cache_data(show_spinner=False, ttl=3600, show_spinner=True)
 def get_stars_over_time(reponames, username):
     '''
     Get the number of stars for each repo in reponames over time.
@@ -385,7 +385,7 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
 
 
 
-@st.cache(show_spinner=False, ttl=3600)
+@st.cache_data(show_spinner=False, ttl=3600)
 def filter_stared_list(repos_stared_at_lists, date_range):
     '''
     Filter the stared list with the date range.
@@ -397,7 +397,7 @@ def filter_stared_list(repos_stared_at_lists, date_range):
     return repos_stared_at_lists_filtered
 
 
-@st.cache(show_spinner=False, ttl=3600)
+@st.cache_data(show_spinner=False, ttl=3600)
 def convert_to_datetime(repos_stared_at_lists):
     '''
     Convert the dates in the stared list to datetime objects.
