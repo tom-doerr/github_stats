@@ -452,7 +452,7 @@ def num_stars_received_last_x_hours(repos_stared_at_lists, hours=24):
     repos_stared_at_lists_datetime_filtered = {}
     now = datetime.now()
     for reponame, stared_list in repos_stared_at_lists.items():
-        stared_list_filtered = [star_date for star_date in stared_list if now - star_date <= datetime.timedelta(hours=hours)]
+        stared_list_filtered = [star_date for star_date in stared_list if now - star_date <= timedelta(hours=hours)]
         repos_stared_at_lists_datetime_filtered[reponame] = stared_list_filtered
 
     _sum = 0
