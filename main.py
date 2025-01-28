@@ -312,20 +312,12 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
     Plot stars over time.
     '''
 
-    # Plot stars over time
-    plt.style.use('fivethirtyeight')
-    fig, ax = plt.subplots()
-    fig.set_size_inches(11, 8)
     dates_all = []
     for reponame in repos_stared_at_lists.keys():
-        # dates = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in repos_stared_at_lists[reponame]]
         dates = repos_stared_at_lists[reponame]
         dates_all.extend(dates)
 
-
-    # Sort the dates.
     dates_all = sorted(dates_all)
-
     y = [i + 1 for i, _ in enumerate(dates_all)]
 
     dates_filtered = []
@@ -335,22 +327,6 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
             if date in repos_stared_at_filtered[reponame]:
                 dates_filtered.append(date)
                 y_filtered.append(y_val)
-
-
-    if False:
-        ax.plot(dates_filtered, y_filtered, label=reponame)
-
-        # Format plot
-        date_fmt = mdates.DateFormatter('%m-%d-%Y')
-        ax.xaxis.set_major_formatter(date_fmt)
-        _ = plt.xticks(rotation=90)
-        _ = plt.title('Github stars over time')
-        _ = plt.xlabel('Date')
-        _ = plt.ylabel('Number of stars')
-
-        # Show plot in streamlit.
-        fig = ax.get_figure()
-        st.pyplot(fig)
 
 
     fig = go.Figure()
