@@ -33,14 +33,16 @@ def check_rate_limit_exceeded(response) -> Optional[datetime]:
     """Returns reset time if rate limited, None otherwise"""
     if isinstance(response, dict):
         json_response = response
+        headers = {}  # No headers for dict responses
     else:
         json_response = response.json()
+        headers = response.headers
         
     if 'message' in json_response and 'rate limit exceeded' in json_response['message']:
-        reset_timestamp = int(response.headers.get('x-ratelimit-reset', 0))
+        reset_timestamp = int(headers.get('x-ratelimit-reset', 0))
         reset_time = datetime.fromtimestamp(reset_timestamp)
-        remaining = int(response.headers.get('x-ratelimit-remaining', 0))
-        limit = int(response.headers.get('x-ratelimit-limit', 0))
+        remaining = int(headers.get('x-ratelimit-remaining', 0))
+        limit = int(headers.get('x-ratelimit-limit', 0))
         
         message = f"""
         GitHub API rate limit exceeded!
