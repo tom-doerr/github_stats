@@ -90,20 +90,20 @@ datetime_today_midnight = datetime(datetime_today.year,
                                  datetime_today.month,
                                  datetime_today.day)
 if num_days:
-    datetime_start = datetime_today_midnight - datetime.timedelta(days=int(num_days))
+    datetime_start = datetime_today_midnight - timedelta(days=int(num_days))
     datetime_end = datetime_today_midnight
 else:
 
     datetime_start_str = query_params.get('datetime_start', '2008-01-01')
     try:
-        datetime_start = datetime.datetime.strptime(datetime_start_str, "%Y-%m-%d %H:%M:%S")
+        datetime_start = datetime.strptime(datetime_start_str, "%Y-%m-%d %H:%M:%S")
     except ValueError:
-        datetime_start = datetime.datetime.strptime('2008-01-01', "%Y-%m-%d")
+        datetime_start = datetime.strptime('2008-01-01', "%Y-%m-%d")
 
     datetime_end_str = query_params.get('datetime_end', '')
     if datetime_end_str:
         try:
-            datetime_end = datetime.datetime.strptime(datetime_end_str, "%Y-%m-%d %H:%M:%S")
+            datetime_end = datetime.strptime(datetime_end_str, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             datetime_end = datetime_tomorrow_midnight
     else:
@@ -438,7 +438,7 @@ def convert_to_datetime(repos_stared_at_lists):
     '''
     repos_stared_at_lists_datetime = {}
     for reponame, stared_list in repos_stared_at_lists.items():
-        stared_list_datetime = [datetime.datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in stared_list]
+        stared_list_datetime = [datetime.strptime(repo_stared_at, "%Y-%m-%dT%H:%M:%SZ") for repo_stared_at in stared_list]
         repos_stared_at_lists_datetime[reponame] = stared_list_datetime
 
     return repos_stared_at_lists_datetime
@@ -449,7 +449,7 @@ def num_stars_received_last_x_hours(repos_stared_at_lists, hours=24):
     Get the number of stars received in the last x hours.
     '''
     repos_stared_at_lists_datetime_filtered = {}
-    now = datetime.datetime.now()
+    now = datetime.now()
     for reponame, stared_list in repos_stared_at_lists.items():
         stared_list_filtered = [star_date for star_date in stared_list if now - star_date <= datetime.timedelta(hours=hours)]
         repos_stared_at_lists_datetime_filtered[reponame] = stared_list_filtered
