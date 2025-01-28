@@ -22,19 +22,35 @@ import json
 import plotly.express as px
 import plotly.graph_objects as go
 import concurrent.futures
-from typing import List, Dict
+from typing import List, Dict, Optional
+import time
+from datetime import datetime, timedelta
 
 
 MAX_NUM_REPOS = None
 
 
-def check_rate_limit_exceeded(json_response):
+def check_rate_limit_exceeded(response) -> Optional[datetime]:
+    """Returns reset time if rate limited, None otherwise"""
+    if isinstance(response, dict):
+        json_response = response
+    else:
+        json_response = response.json()
+        
     if 'message' in json_response and 'rate limit exceeded' in json_response['message']:
-        print(json_response['message'])
-        # print in streamlit as error
-        st.error(json_response['message'])
-        # stop
-        st.stop()
+        reset_timestamp = int(response.headers.get('x-ratelimit-reset', 0))
+        reset_time = datetime.fromtimestamp(reset_timestamp)
+        remaining = int(response.headers.get('x-ratelimit-remaining', 0))
+        limit = int(response.headers.get('x-ratelimit-limit', 0))
+        
+        message = f"""
+        GitHub API rate limit exceeded!
+        - Remaining: {remaining}/{limit} requests
+        - Resets at: {reset_time.strftime('%Y-%m-%d %H:%M:%S')}
+        """
+        st.warning(message)
+        return reset_time
+    return None
 
 # check if ./streamlit/secrets.toml exists
 if os.path.exists('./.streamlit/secrets.toml'):
@@ -158,10 +174,29 @@ print('star_count:', star_count)
 
 def get_repo_stars_page(username: str, repo: str, page: int, headers_accept: Dict) -> List[str]:
     url = f'https://api.github.com/repos/{username}/{repo}/stargazers?page={page}&per_page=100'
-    r = requests.get(url, headers=headers_accept)
-    data = r.json()
-    check_rate_limit_exceeded(data)
-    return [user['starred_at'] for user in data] if data else []
+    max_retries = 5
+    retry_delay = 1
+    
+    for attempt in range(max_retries):
+        r = requests.get(url, headers=headers_accept)
+        reset_time = check_rate_limit_exceeded(r)
+        
+        if reset_time is None:
+            return [user['starred_at'] for user in r.json()] if r.json() else []
+            
+        wait_time = (reset_time - datetime.now()).total_seconds()
+        if wait_time > 0:
+            st.info(f"Waiting {wait_time:.0f} seconds for rate limit reset...")
+            time.sleep(wait_time + 1)  # Add 1 second buffer
+            continue
+            
+        retry_delay *= 2  # Exponential backoff
+        if attempt < max_retries - 1:
+            st.info(f"Retrying in {retry_delay} seconds...")
+            time.sleep(retry_delay)
+            
+    st.error("Max retries exceeded. Please try again later.")
+    st.stop()
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def get_repo_stars(username: str, repo: str) -> List[str]:
