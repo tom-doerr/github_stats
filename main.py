@@ -167,7 +167,7 @@ def get_repo_stars(username, repo):
     headers_accept = headers.copy()
     headers_accept['Accept'] = 'application/vnd.github.v3.star+json'
     while True:
-        url = 'https://api.github.com/repos/' + username + '/' + repo + '/stargazers?page=' + str(page) 
+        url = 'https://api.github.com/repos/' + username + '/' + repo + '/stargazers?page=' + str(page) + '&per_page=100'
         r = requests.get(url, headers=headers_accept)
         page = page + 1
         if len(r.json()) == 0:
