@@ -154,8 +154,8 @@ else:
 return_dict = {}
 while True:
     response = requests.get(url, headers=headers)
-    data = json.loads(response.text)
-    check_rate_limit_exceeded(data)
+    check_rate_limit_exceeded(response)
+    data = response.json()
     for repo in data:
         return_dict[repo['name']] = repo
     if 'next' not in response.links.keys():
