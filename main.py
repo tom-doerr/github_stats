@@ -45,7 +45,7 @@ else:
     else:
         GITHUB_AUTH_TOKEN = None
 
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 print("query_params:", query_params)
 
 
@@ -112,10 +112,12 @@ date_range = st.sidebar.slider('Select date range:',
 datetime_start, datetime_end = date_range
 datetime_start_str = datetime_start.strftime("%Y-%m-%d %H:%M:%S")
 datetime_end_str = datetime_end.strftime("%Y-%m-%d %H:%M:%S")
-st.experimental_set_query_params(datetime_start=datetime_start_str,
-                                 datetime_end=datetime_end_str,
-                                 num_days=num_days,
-                                    username=username)
+st.query_params.update({
+    "datetime_start": datetime_start_str,
+    "datetime_end": datetime_end_str,
+    "num_days": num_days,
+    "username": username
+})
 
 
 # Prompt user to enter username if none is entered.
