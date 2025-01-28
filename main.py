@@ -14,8 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os
 import numpy as np
-import datetime
-import time
+from datetime import datetime, timedelta
 import pandas as pd
 import streamlit as st
 import json
@@ -76,20 +75,20 @@ username = username.strip()
 # st.experimental_set_query_params(username=username)
 
 
-datetime_tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
-datetime_tomorrow_midnight = datetime.datetime(datetime_tomorrow.year,
-                                               datetime_tomorrow.month,
-                                               datetime_tomorrow.day)
+datetime_tomorrow = datetime.now() + timedelta(days=1)
+datetime_tomorrow_midnight = datetime(datetime_tomorrow.year,
+                                    datetime_tomorrow.month,
+                                    datetime_tomorrow.day)
 
 num_days_default = query_params.get('num_days', '')
 
 # Get x number of days to show.
 num_days = st.sidebar.text_input('Enter number of days to show:', num_days_default)
 
-datetime_today = datetime.datetime.now()
-datetime_today_midnight = datetime.datetime(datetime_today.year,
-                                               datetime_today.month,
-                                               datetime_today.day)
+datetime_today = datetime.now()
+datetime_today_midnight = datetime(datetime_today.year,
+                                 datetime_today.month,
+                                 datetime_today.day)
 if num_days:
     datetime_start = datetime_today_midnight - datetime.timedelta(days=int(num_days))
     datetime_end = datetime_today_midnight
@@ -118,7 +117,7 @@ st.sidebar.markdown('**Date range**')
 date_range = st.sidebar.slider('Select date range:',
     value=(datetime_start,
            datetime_end),
-    min_value=datetime.datetime.strptime('2008-01-01', "%Y-%m-%d"),
+    min_value=datetime.strptime('2008-01-01', "%Y-%m-%d"),
     max_value=datetime_tomorrow_midnight,
     format='YYYY-MM-DD')
 
