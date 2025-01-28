@@ -303,19 +303,18 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
     '''
     Plot stars over time using Plotly.
     '''
-
-    # Plot stars over time
     fig = go.Figure()
     for reponame in repos_stared_at_lists.keys():
         dates = repos_stared_at_lists[reponame]
-        y = [i + 1 for i, _ in enumerate(repos_stared_at_lists[reponame])]
         dates_filtered = []
-        y_filtered = []
-        for date, y_val in zip(dates, y):
+        for date in dates:
             if date in repos_stared_at_filtered[reponame]:
                 dates_filtered.append(date)
-                y_filtered.append(y_val)
-
+                
+        # Sort dates and generate y values after sorting
+        dates_filtered.sort()
+        y_filtered = [i + 1 for i in range(len(dates_filtered))]
+        
         fig.add_trace(go.Scatter(x=dates_filtered, y=y_filtered, name=reponame))
 
 
