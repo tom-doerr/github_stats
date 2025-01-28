@@ -502,8 +502,12 @@ def main() -> None:
     st.subheader('Total stars: {}'.format(total_stars))
 
     repos_stared_at_filtered = filter_stared_list(repos_stared_at_lists, date_range)
-    plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
-    plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
+    
+    # Only show combined plots when viewing all repositories
+    if selected_repo == 'All repositories':
+        plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
+        plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_stared_at_filtered)
+        
     num_stars_last_24_hours_repos, num_stars_last_24_hours_sum = num_stars_received_last_x_hours(repos_stared_at_lists, hours=24)
 
     stars_last_7_days = num_stars_received_last_x_hours(repos_stared_at_lists, hours=7*24)
