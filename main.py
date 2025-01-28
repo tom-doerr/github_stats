@@ -408,13 +408,14 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
 
 
         dates = repos_stared_at_lists[reponame]
-        y = [i + 1 for i, _ in enumerate(repos_stared_at_lists[reponame])]
         dates_filtered = []
-        y_filtered = []
-        for date, y_val in zip(dates, y):
+        for date in dates:
             if date in repos_stared_at_filtered[reponame]:
                 dates_filtered.append(date)
-                y_filtered.append(y_val)
+                
+        # Sort dates and generate y values after sorting
+        dates_filtered.sort()
+        y_filtered = [i + 1 for i in range(len(dates_filtered))]
 
         # plot using a line plot
 
