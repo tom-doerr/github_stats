@@ -305,7 +305,7 @@ def plot_stars_over_time_plotly(reponames, username, repos_stared_at_lists, repo
 
 
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="combined_plot")
 
 
 
@@ -346,7 +346,7 @@ def plot_stars_over_time_all(reponames, username, repos_stared_at_lists, repos_s
         margin=dict(l=0, r=0, t=0, b=0),
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="all_stars_plot")
 
 
 
@@ -449,7 +449,7 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
             x=0.01
         ))
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key=f"repo_plot_{reponame}")
 
 
 
