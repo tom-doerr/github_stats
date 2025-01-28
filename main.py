@@ -17,6 +17,12 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+
+st.set_page_config(
+    page_title="GitHub Star History",
+    page_icon="⭐",
+    layout="wide"
+)
 import plotly.graph_objects as go
 import concurrent.futures
 from typing import List, Dict, Optional
