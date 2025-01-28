@@ -188,7 +188,7 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
             future = executor.submit(get_repo_stars_page, username, repo, page, headers_accept)
             future_to_page[future] = page
             
-            if len(future_to_page) >= 3:  # Max 3 concurrent requests
+            if len(future_to_page) >= 10:  # Max 10 concurrent requests
                 done, _ = concurrent.futures.wait(future_to_page, return_when=concurrent.futures.FIRST_COMPLETED)
                 for future in done:
                     results = future.result()
