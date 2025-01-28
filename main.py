@@ -68,11 +68,28 @@ print("query_params:", query_params)
 # Get user's repo names from Github API
 username_default = query_params.get('username', '') 
 
-username = st.sidebar.text_input('Enter Github username:', username_default)
-username = username.strip()
+def parse_github_input(input_str: str) -> tuple[str, Optional[str]]:
+    """Parse username or username/repo from input string"""
+    input_str = input_str.strip()
+    
+    # Handle full GitHub URLs
+    if input_str.startswith(('http://', 'https://')):
+        parts = input_str.split('github.com/')
+        if len(parts) > 1:
+            input_str = parts[1].strip('/')
+    
+    # Split into username and optional repo
+    parts = input_str.split('/')
+    username = parts[0]
+    repo = parts[1] if len(parts) > 1 else None
+    
+    return username, repo
 
-# Get repo name from query params
-repo_default = query_params.get('repo', '')
+github_input = st.sidebar.text_input('Enter Github username or username/repo:', username_default)
+username, repo_from_input = parse_github_input(github_input)
+
+# Get repo name from query params or input
+repo_default = repo_from_input or query_params.get('repo', '')
 
 # st.experimental_set_query_params(username=username)
 
