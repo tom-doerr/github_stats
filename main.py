@@ -21,6 +21,8 @@ import streamlit as st
 import json
 import plotly.express as px
 import plotly.graph_objects as go
+import concurrent.futures
+from typing import List, Dict
 
 
 MAX_NUM_REPOS = None
@@ -158,26 +160,47 @@ r = requests.get(url, headers=headers)
 star_count = len(r.json())
 print('star_count:', star_count)
 
+def get_repo_stars_page(username: str, repo: str, page: int, headers_accept: Dict) -> List[str]:
+    url = f'https://api.github.com/repos/{username}/{repo}/stargazers?page={page}&per_page=100'
+    r = requests.get(url, headers=headers_accept)
+    data = r.json()
+    check_rate_limit_exceeded(data)
+    return [user['starred_at'] for user in data] if data else []
+
 @st.cache(show_spinner=False, ttl=3600)
-def get_repo_stars(username, repo):
-    '''
-    Get all starred_at datetime values of a GitHub repo.
-    '''
+def get_repo_stars(username: str, repo: str) -> List[str]:
     starred_at = []
-    page = 1
-    # copy headers to headers_accept
     headers_accept = headers.copy()
     headers_accept['Accept'] = 'application/vnd.github.v3.star+json'
-    while True:
-        url = 'https://api.github.com/repos/' + username + '/' + repo + '/stargazers?page=' + str(page) + '&per_page=100'
-        r = requests.get(url, headers=headers_accept)
-        page = page + 1
-        if len(r.json()) == 0:
-            break
-        check_rate_limit_exceeded(r.json())
-        for user in r.json():
-            starred_at.append(user['starred_at'])
-        time.sleep(0.5)
+    
+    # Get first page to check total
+    first_page = get_repo_stars_page(username, repo, 1, headers_accept)
+    if not first_page:
+        return []
+    
+    starred_at.extend(first_page)
+    
+    # Calculate remaining pages
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        page = 2
+        future_to_page = {}
+        while True:
+            future = executor.submit(get_repo_stars_page, username, repo, page, headers_accept)
+            future_to_page[future] = page
+            
+            if len(future_to_page) >= 3:  # Max 3 concurrent requests
+                done, _ = concurrent.futures.wait(future_to_page, return_when=concurrent.futures.FIRST_COMPLETED)
+                for future in done:
+                    results = future.result()
+                    if not results:  # No more pages
+                        executor.shutdown(wait=False)
+                        return starred_at
+                    starred_at.extend(results)
+                    del future_to_page[future]
+            
+            page += 1
+            time.sleep(0.2)  # Small delay between spawning requests
+            
     return starred_at
 
 # Plot stars over time
