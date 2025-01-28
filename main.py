@@ -181,7 +181,7 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     starred_at.extend(first_page)
     
     # Calculate remaining pages
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         page = 2
         future_to_page = {}
         while True:
@@ -199,7 +199,7 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
                     del future_to_page[future]
             
             page += 1
-            time.sleep(0.2)  # Small delay between spawning requests
+            time.sleep(0.1)  # Small delay between spawning requests
             
     return starred_at
 
