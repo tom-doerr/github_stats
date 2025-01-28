@@ -52,10 +52,7 @@ print("query_params:", query_params)
 
 
 # Get user's repo names from Github API
-if 'username' in query_params:
-    username_default = query_params['username'][0]
-else:
-    username_default = ''
+username_default = query_params.get('username', '') 
 
 username = st.sidebar.text_input('Enter Github username:', username_default)
 username = username.strip()
@@ -68,10 +65,7 @@ datetime_tomorrow_midnight = datetime.datetime(datetime_tomorrow.year,
                                                datetime_tomorrow.month,
                                                datetime_tomorrow.day)
 
-if 'num_days' in query_params:
-    num_days_default = query_params['num_days'][0]
-else:
-    num_days_default = ''
+num_days_default = query_params.get('num_days', '')
 
 # Get x number of days to show.
 num_days = st.sidebar.text_input('Enter number of days to show:', num_days_default)
@@ -85,16 +79,18 @@ if num_days:
     datetime_end = datetime_today_midnight
 else:
 
-    if 'datetime_start' in query_params:
-        datetime_start_str = query_params['datetime_start'][0]
+    datetime_start_str = query_params.get('datetime_start', '2008-01-01')
+    try:
         datetime_start = datetime.datetime.strptime(datetime_start_str, "%Y-%m-%d %H:%M:%S")
-    else:
+    except ValueError:
         datetime_start = datetime.datetime.strptime('2008-01-01', "%Y-%m-%d")
 
-
-    if 'datetime_end' in query_params:
-        datetime_end_str = query_params['datetime_end'][0]
-        datetime_end = datetime.datetime.strptime(datetime_end_str, "%Y-%m-%d %H:%M:%S")
+    datetime_end_str = query_params.get('datetime_end', '')
+    if datetime_end_str:
+        try:
+            datetime_end = datetime.datetime.strptime(datetime_end_str, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            datetime_end = datetime_tomorrow_midnight
     else:
         datetime_end = datetime_tomorrow_midnight
 
