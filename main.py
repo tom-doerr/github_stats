@@ -200,7 +200,7 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     return starred_at
 
 # Plot stars over time
-@st.cache_data(show_spinner=False, ttl=3600, show_spinner=True)
+@st.cache_data(ttl=3600, show_spinner=True)
 def get_stars_over_time(reponames, username):
     '''
     Get the number of stars for each repo in reponames over time.
