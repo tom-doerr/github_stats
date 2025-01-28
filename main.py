@@ -71,6 +71,9 @@ username_default = query_params.get('username', '')
 username = st.sidebar.text_input('Enter Github username:', username_default)
 username = username.strip()
 
+# Get repo name from query params
+repo_default = query_params.get('repo', '')
+
 # st.experimental_set_query_params(username=username)
 
 
@@ -160,8 +163,16 @@ while True:
     else:
         url = response.links['next']['url']
 
+reponames = sorted(return_dict.keys())
+selected_repo = st.sidebar.selectbox('Select repository (optional):', 
+                                   ['All repositories'] + reponames,
+                                   index=0 if not repo_default else reponames.index(repo_default) + 1)
 
-reponames = list(return_dict.keys())
+if selected_repo != 'All repositories':
+    reponames = [selected_repo]
+    st.query_params['repo'] = selected_repo
+else:
+    st.query_params.pop('repo', None)
 
 
 # Get repo's star counts from Github API with the starred_at attribute using the v3 API.
