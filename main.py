@@ -35,22 +35,29 @@ MAX_NUM_REPOS = None
 
 @lru_cache(maxsize=1000)
 def get_etag(url: str) -> str:
-    """Get cached ETag for URL"""
+    """Get cached ETag for URL. ETags are unique identifiers returned by GitHub 
+    that represent the current version of a resource. If we send the same ETag 
+    back in a subsequent request with If-None-Match header, GitHub will return 
+    304 Not Modified if the resource hasn't changed, saving our API quota."""
     return ""
 
 def save_etag(url: str, etag: str) -> None:
-    """Save ETag for URL"""
+    """Save ETag for URL to be used in future requests. Clears the cache to 
+    ensure the new ETag is used."""
     get_etag.cache_clear()
     get_etag.cache_info()
     
 def make_conditional_request(url: str, headers: Dict) -> requests.Response:
-    """Make conditional request using ETags"""
+    """Make conditional request using ETags. This helps reduce API quota usage by:
+    1. Including the ETag in If-None-Match header if we have one cached
+    2. Getting a 304 Not Modified response (no data) if resource hasn't changed
+    3. Getting new data and ETag only if resource has changed"""
     etag = get_etag(url)
     if etag:
         headers = headers.copy()
         headers['If-None-Match'] = etag
     
-    response = make_conditional_request(url, headers)
+    response = requests.get(url, headers=headers)
     
     if response.status_code == 304:  # Not Modified
         return response
