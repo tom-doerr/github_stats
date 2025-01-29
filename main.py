@@ -245,6 +245,9 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     if r.status_code == 200:
         total_stars = r.json().get('stargazers_count', 0)
         st.write(f"Total stars for {repo}: {total_stars}")
+    else:
+        st.error(f"Failed to get repo info for {repo}")
+        return []
     
     first_page = get_repo_stars_page(username, repo, 1, headers_accept)
     if not first_page:
@@ -252,6 +255,10 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     
     starred_at.extend(first_page)
     st.write(f"Got {len(first_page)} stars from first page")
+    
+    if len(starred_at) >= total_stars:
+        st.write(f"Collected all {total_stars} stars for {repo}")
+        return starred_at
     
     # Calculate remaining pages
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -265,8 +272,8 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
                 done, _ = concurrent.futures.wait(future_to_page, return_when=concurrent.futures.FIRST_COMPLETED)
                 for future in done:
                     results = future.result()
-                    if not results:  # No more pages
-                        st.write(f"Finished getting stars for {repo}. Total collected: {len(starred_at)}")
+                    if not results or len(starred_at) >= total_stars:  # No more pages or got all stars
+                        st.write(f"Finished getting stars for {repo}. Total collected: {len(starred_at)} of {total_stars}")
                         executor.shutdown(wait=False)
                         return starred_at
                     starred_at.extend(results)
