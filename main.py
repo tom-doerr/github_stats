@@ -177,14 +177,36 @@ else:
 return_dict = {}
 while True:
     response = requests.get(url, headers=headers)
-    check_rate_limit_exceeded(response)
-    data = response.json()
-    for repo in data:
-        return_dict[repo['name']] = repo
-    if 'next' not in response.links.keys():
-        break
-    else:
+    reset_time = check_rate_limit_exceeded(response)
+    if reset_time:
+        wait_time = (reset_time - datetime.now()).total_seconds()
+        if wait_time > 0:
+            st.info(f"Waiting {wait_time:.0f} seconds for rate limit reset...")
+            time.sleep(wait_time + 1)
+            continue
+            
+    try:
+        data = response.json()
+        if isinstance(data, str):
+            st.error(f"Unexpected string response: {data}")
+            st.stop()
+        if not isinstance(data, list):
+            st.error(f"Unexpected response type: {type(data)}")
+            st.stop()
+            
+        for repo in data:
+            return_dict[repo['name']] = repo
+            
+        if 'next' not in response.links.keys():
+            break
         url = response.links['next']['url']
+            
+    except json.JSONDecodeError:
+        st.error("Invalid JSON response from GitHub API")
+        st.stop()
+    except KeyError as e:
+        st.error(f"Missing expected field in response: {e}")
+        st.stop()
 
 reponames = sorted(return_dict.keys())
 selected_repo = st.sidebar.selectbox('Select repository (optional):', 
