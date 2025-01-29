@@ -264,7 +264,7 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         page = 2
         future_to_page = {}
-        while True:
+        while len(starred_at) < total_stars:  # Continue until we have all stars
             future = executor.submit(get_repo_stars_page, username, repo, page, headers_accept)
             future_to_page[future] = page
             
@@ -272,16 +272,16 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
                 done, _ = concurrent.futures.wait(future_to_page, return_when=concurrent.futures.FIRST_COMPLETED)
                 for future in done:
                     results = future.result()
-                    if not results or len(starred_at) >= total_stars:  # No more pages or got all stars
-                        st.write(f"Finished getting stars for {repo}. Total collected: {len(starred_at)} of {total_stars}")
-                        executor.shutdown(wait=False)
-                        return starred_at
+                    if not results:  # No more results on this page
+                        continue
                     starred_at.extend(results)
                     st.write(f"Got {len(results)} more stars. Total so far: {len(starred_at)}")
                     del future_to_page[future]
             
             page += 1
             time.sleep(0.1)  # Small delay between spawning requests
+            
+        st.write(f"Finished getting stars for {repo}. Total collected: {len(starred_at)} of {total_stars}")
             
     return starred_at
 
