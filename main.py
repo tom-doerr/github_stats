@@ -293,7 +293,6 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     starred_at.extend(first_page)
     
     if len(starred_at) >= total_stars:
-        st.write(f"Collected all {total_stars} stars for {repo}")
         return starred_at
     
     # Calculate remaining pages
