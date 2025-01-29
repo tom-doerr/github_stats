@@ -316,19 +316,12 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
 
 # Plot stars over time
 @st.cache_data(ttl=3600, show_spinner=True)
-def get_stars_over_time(reponames, username, progress_text, progress_bar):
+def get_stars_over_time(reponames, username):
     '''
     Get the number of stars for each repo in reponames over time.
     '''
-    stars_over_time = []
     repos_stared_at_lists = {}
-    total_repos = len(reponames[:MAX_NUM_REPOS])
-    for repo_num, reponame in enumerate(reponames[:MAX_NUM_REPOS]):
-        progress = (repo_num + 1) / total_repos
-        if progress_text and progress_bar:
-            progress_text.text(f'Processing {reponame} ({repo_num + 1}/{total_repos})')
-            progress_bar.progress(progress)
-        
+    for reponame in reponames[:MAX_NUM_REPOS]:
         repos_stared_at = []
         star_dates_and_times = get_repo_stars(username, reponame)
         repos_stared_at_lists[reponame] = star_dates_and_times
@@ -551,7 +544,17 @@ def main() -> None:
     progress_bar = st.progress(0)
     
     progress_text.text("Fetching repository data...")
-    repos_stared_at_lists = get_stars_over_time(reponames, username, progress_text, progress_bar)
+    
+    total_repos = len(reponames[:MAX_NUM_REPOS])
+    repos_stared_at_lists = {}
+    
+    for repo_num, reponame in enumerate(reponames[:MAX_NUM_REPOS]):
+        progress = (repo_num + 1) / total_repos
+        progress_text.text(f'Processing {reponame} ({repo_num + 1}/{total_repos})')
+        progress_bar.progress(progress)
+        
+        repo_stars = get_stars_over_time([reponame], username)
+        repos_stared_at_lists.update(repo_stars)
     
     progress_text.text("Processing dates...")
     repos_stared_at_lists = convert_to_datetime(repos_stared_at_lists)
