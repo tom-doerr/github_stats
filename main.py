@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+from functools import lru_cache
 
 st.set_page_config(
     page_title="GitHub Star History",
@@ -32,27 +33,58 @@ from datetime import datetime, timedelta
 MAX_NUM_REPOS = None
 
 
+@lru_cache(maxsize=1000)
+def get_etag(url: str) -> str:
+    """Get cached ETag for URL"""
+    return ""
+
+def save_etag(url: str, etag: str) -> None:
+    """Save ETag for URL"""
+    get_etag.cache_clear()
+    get_etag.cache_info()
+    
+def make_conditional_request(url: str, headers: Dict) -> requests.Response:
+    """Make conditional request using ETags"""
+    etag = get_etag(url)
+    if etag:
+        headers = headers.copy()
+        headers['If-None-Match'] = etag
+    
+    response = make_conditional_request(url, headers)
+    
+    if response.status_code == 304:  # Not Modified
+        return response
+        
+    if 'ETag' in response.headers:
+        save_etag(url, response.headers['ETag'])
+        
+    return response
+
 def check_rate_limit_exceeded(response) -> Optional[datetime]:
     """Returns reset time if rate limited, None otherwise"""
     if isinstance(response, dict):
         json_response = response
-        headers = {}  # No headers for dict responses
+        headers = {}
     else:
-        json_response = response.json()
+        json_response = response.json() if response.status_code != 304 else {}
         headers = response.headers
         
-    if 'message' in json_response and 'rate limit exceeded' in json_response['message']:
-        reset_timestamp = int(headers.get('x-ratelimit-reset', 0))
-        reset_time = datetime.fromtimestamp(reset_timestamp)
-        remaining = int(headers.get('x-ratelimit-remaining', 0))
-        limit = int(headers.get('x-ratelimit-limit', 0))
+    # Always show current rate limit status
+    remaining = int(headers.get('x-ratelimit-remaining', 0))
+    limit = int(headers.get('x-ratelimit-limit', 0))
+    reset_timestamp = int(headers.get('x-ratelimit-reset', 0))
+    reset_time = datetime.fromtimestamp(reset_timestamp)
+    
+    if remaining < limit * 0.1:  # Warning at 10% remaining
+        st.warning(f"GitHub API rate limit low: {remaining}/{limit} requests remaining")
         
+    if 'message' in json_response and 'rate limit exceeded' in json_response['message']:
         message = f"""
         GitHub API rate limit exceeded!
         - Remaining: {remaining}/{limit} requests
         - Resets at: {reset_time.strftime('%Y-%m-%d %H:%M:%S')}
         """
-        st.warning(message)
+        st.error(message)
         return reset_time
     return None
 
