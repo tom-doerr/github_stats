@@ -224,7 +224,6 @@ def get_repo_stars_page(username: str, repo: str, page: int, headers_accept: Dic
                 st.error(f"Unexpected string response for {repo} at page {page}: {data}")
                 return []
             if not data:
-                st.write(f"No more data for {repo} at page {page}")
                 return []
             if not isinstance(data, list):
                 st.error(f"Unexpected response type for {repo} at page {page}: {type(data)}")
@@ -257,7 +256,6 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     r = requests.get(repo_url, headers=headers_accept)
     if r.status_code == 200:
         total_stars = r.json().get('stargazers_count', 0)
-        st.write(f"Total stars for {repo}: {total_stars}")
     else:
         st.error(f"Failed to get repo info for {repo}")
         return []
@@ -267,7 +265,6 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
         return []
     
     starred_at.extend(first_page)
-    st.write(f"Got {len(first_page)} stars from first page")
     
     if len(starred_at) >= total_stars:
         st.write(f"Collected all {total_stars} stars for {repo}")
@@ -288,13 +285,10 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
                     if not results:  # No more results on this page
                         continue
                     starred_at.extend(results)
-                    st.write(f"Got {len(results)} more stars. Total so far: {len(starred_at)}")
                     del future_to_page[future]
             
             page += 1
             time.sleep(0.1)  # Small delay between spawning requests
-            
-        st.write(f"Finished getting stars for {repo}. Total collected: {len(starred_at)} of {total_stars}")
             
     return starred_at
 
