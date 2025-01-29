@@ -214,7 +214,10 @@ def get_repo_stars_page(username: str, repo: str, page: int, headers_accept: Dic
         reset_time = check_rate_limit_exceeded(r)
         
         if reset_time is None:
-            return [user['starred_at'] for user in r.json()] if r.json() else []
+            data = r.json()
+            if not data:
+                st.write(f"No more data for {repo} at page {page}")
+            return [user['starred_at'] for user in data] if data else []
             
         wait_time = (reset_time - datetime.now()).total_seconds()
         if wait_time > 0:
@@ -236,12 +239,19 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     headers_accept = headers.copy()
     headers_accept['Accept'] = 'application/vnd.github.v3.star+json'
     
-    # Get first page to check total
+    # Get first page and check total stars from API
+    repo_url = f'https://api.github.com/repos/{username}/{repo}'
+    r = requests.get(repo_url, headers=headers_accept)
+    if r.status_code == 200:
+        total_stars = r.json().get('stargazers_count', 0)
+        st.write(f"Total stars for {repo}: {total_stars}")
+    
     first_page = get_repo_stars_page(username, repo, 1, headers_accept)
     if not first_page:
         return []
     
     starred_at.extend(first_page)
+    st.write(f"Got {len(first_page)} stars from first page")
     
     # Calculate remaining pages
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -256,9 +266,11 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
                 for future in done:
                     results = future.result()
                     if not results:  # No more pages
+                        st.write(f"Finished getting stars for {repo}. Total collected: {len(starred_at)}")
                         executor.shutdown(wait=False)
                         return starred_at
                     starred_at.extend(results)
+                    st.write(f"Got {len(results)} more stars. Total so far: {len(starred_at)}")
                     del future_to_page[future]
             
             page += 1
