@@ -209,6 +209,10 @@ while True:
         st.stop()
 
 reponames = sorted(return_dict.keys())
+# Reset repo selection when username changes
+if repo_default and repo_default not in reponames:
+    repo_default = ''
+    
 selected_repo = st.sidebar.selectbox('Select repository (optional):', 
                                    ['All repositories'] + reponames,
                                    index=0 if not repo_default else reponames.index(repo_default) + 1)
