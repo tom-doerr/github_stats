@@ -211,13 +211,26 @@ def get_repo_stars_page(username: str, repo: str, page: int, headers_accept: Dic
     
     for attempt in range(max_retries):
         r = requests.get(url, headers=headers_accept)
-        reset_time = check_rate_limit_exceeded(r)
         
-        if reset_time is None:
+        try:
             data = r.json()
+        except json.JSONDecodeError:
+            st.error(f"Invalid JSON response for {repo} at page {page}")
+            return []
+            
+        reset_time = check_rate_limit_exceeded(r)
+        if reset_time is None:
+            if isinstance(data, str):
+                st.error(f"Unexpected string response for {repo} at page {page}: {data}")
+                return []
             if not data:
                 st.write(f"No more data for {repo} at page {page}")
-            return [user['starred_at'] for user in data] if data else []
+                return []
+            if not isinstance(data, list):
+                st.error(f"Unexpected response type for {repo} at page {page}: {type(data)}")
+                return []
+                
+            return [user['starred_at'] for user in data]
             
         wait_time = (reset_time - datetime.now()).total_seconds()
         if wait_time > 0:
