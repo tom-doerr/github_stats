@@ -300,18 +300,15 @@ def get_stars_over_time(reponames, username):
     '''
     stars_over_time = []
     repos_stared_at_lists = {}
-    counter = st.empty()
-    repo_name_text = st.empty()
+    total_repos = len(reponames[:MAX_NUM_REPOS])
     for repo_num, reponame in enumerate(reponames[:MAX_NUM_REPOS]):
-        counter.text(f'Loading data for repo {repo_num} of {len(reponames)}...')
-        repo_name_text.text(f'Processing {reponame}')
+        progress = (repo_num + 1) / total_repos
+        progress_text.text(f'Processing {reponame} ({repo_num + 1}/{total_repos})')
+        progress_bar.progress(progress)
+        
         repos_stared_at = []
         star_dates_and_times = get_repo_stars(username, reponame)
-
         repos_stared_at_lists[reponame] = star_dates_and_times
-
-    counter.text('')
-    repo_name_text.text('')
     return repos_stared_at_lists
 
 
@@ -525,8 +522,19 @@ def plot_stars_repos_individually(reponames, username, repos_stared_at_lists, re
 
 # st.title('Github stars over time')
 def main() -> None:
+    st.title('GitHub Star History')
+    
+    progress_text = st.empty()
+    progress_bar = st.progress(0)
+    
+    progress_text.text("Fetching repository data...")
     repos_stared_at_lists = get_stars_over_time(reponames, username)
+    
+    progress_text.text("Processing dates...")
     repos_stared_at_lists = convert_to_datetime(repos_stared_at_lists)
+    
+    progress_text.empty()
+    progress_bar.empty()
     # Show total num stars for user.
     total_stars = 0
     for reponame, stared_list in repos_stared_at_lists.items():
