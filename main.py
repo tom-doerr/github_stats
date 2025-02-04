@@ -26,7 +26,7 @@ class GitHubRateLimiter:
         self.headers = headers
         self.safety_buffer = safety_buffer
         self._last_check = 0
-        self._check_interval = 60  # Only check rate limit every 60 seconds
+        self._check_interval = 5  # Check rate limit every 5 seconds
         self.requests_this_hour = []
         
         # Calculate max requests per second to stay under limit
