@@ -21,6 +21,65 @@ from functools import lru_cache
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Tuple
 
+class GitHubRateLimiter:
+    def __init__(self, headers: Dict, safety_buffer: int = 1500):
+        self.headers = headers
+        self.safety_buffer = safety_buffer
+        self._last_check = 0
+        self._check_interval = 60  # Only check rate limit every 60 seconds
+        self.requests_this_hour = []
+        
+        # Calculate max requests per second to stay under limit
+        self.max_requests_per_hour = 5000 - safety_buffer
+        self.min_seconds_between_requests = 3600 / self.max_requests_per_hour
+
+    def get_rate_limit_info(self) -> tuple[int, int, datetime]:
+        """Get current rate limit info from GitHub"""
+        now = time.time()
+        if now - self._last_check > self._check_interval:
+            r = requests.get('https://api.github.com/rate_limit', headers=self.headers)
+            data = r.json()
+            
+            self.remaining = data['rate']['remaining']
+            self.limit = data['rate']['limit']
+            self.reset_time = datetime.fromtimestamp(data['rate']['reset'])
+            self._last_check = now
+            
+        return self.remaining, self.limit, self.reset_time
+
+    def wait_if_needed(self) -> None:
+        """Wait if we're approaching rate limits or need to throttle requests"""
+        now = time.time()
+        
+        # Clean up old requests
+        hour_ago = now - 3600
+        self.requests_this_hour = [t for t in self.requests_this_hour if t > hour_ago]
+        
+        # Check if we need to wait based on rate limit
+        remaining, limit, reset_time = self.get_rate_limit_info()
+        if remaining <= self.safety_buffer:
+            wait_time = (reset_time - datetime.now()).total_seconds()
+            if wait_time > 0:
+                st.warning(f"Rate limit approaching ({remaining} remaining). "
+                          f"Waiting {wait_time:.1f} seconds for reset...")
+                time.sleep(wait_time + 1)
+                self.requests_this_hour = []
+                return
+
+        # Throttle requests to stay under max_requests_per_hour
+        if self.requests_this_hour:
+            time_since_last_request = now - self.requests_this_hour[-1]
+            if time_since_last_request < self.min_seconds_between_requests:
+                sleep_time = self.min_seconds_between_requests - time_since_last_request
+                time.sleep(sleep_time)
+        
+        self.requests_this_hour.append(time.time())
+
+def make_github_request(url: str, headers: Dict) -> requests.Response:
+    """Make a GitHub API request with rate limiting"""
+    rate_limiter.wait_if_needed()
+    return requests.get(url, headers=headers)
+
 st.set_page_config(
     page_title="GitHub Star History",
     page_icon="⭐",
