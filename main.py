@@ -17,9 +17,14 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import orjson
 from functools import lru_cache
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Tuple
+
+# Configure plotly to use orjson
+import plotly.io as pio
+pio.json.config.default_engine = 'json'  # Fall back to standard json
 
 class GitHubRateLimiter:
     def __init__(self, headers: Dict, safety_buffer: int = 1500):
