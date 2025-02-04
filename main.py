@@ -84,11 +84,12 @@ class GitHubRateLimiter:
         if remaining <= self.safety_buffer:
             wait_time = (reset_time - datetime.now()).total_seconds()
             if wait_time > 0:
+                warning_msg = f"Rate limit approaching ({remaining} remaining). Waiting {wait_time:.1f} seconds for reset..."
                 st.write("")
                 st.write("")
                 st.write("")
-                st.warning(f"Rate limit approaching ({remaining} remaining). "
-                          f"Waiting {wait_time:.1f} seconds for reset...")
+                st.warning(warning_msg)
+                st.sidebar.warning(warning_msg)
                 time.sleep(wait_time + 1)
                 self.requests_this_hour = []
                 return
