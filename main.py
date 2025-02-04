@@ -419,44 +419,15 @@ def get_repo_stars(username: str, repo: str) -> List[str]:
     headers_accept = headers.copy()
     headers_accept['Accept'] = 'application/vnd.github.v3.star+json'
     
-    # Get first page and check total stars from API
-    repo_url = f'https://api.github.com/repos/{username}/{repo}'
-    r = requests.get(repo_url, headers=headers_accept)
-    if r.status_code == 200:
-        total_stars = r.json().get('stargazers_count', 0)
-    else:
-        st.error(f"Failed to get repo info for {repo}")
-        return []
-    
-    first_page = get_repo_stars_page(username, repo, 1, headers_accept)
-    if not first_page:
-        return []
-    
-    starred_at.extend(first_page)
-    
-    if len(starred_at) >= total_stars:
-        return starred_at
-    
-    # Calculate remaining pages
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        page = 2
-        future_to_page = {}
-        while len(starred_at) < total_stars:  # Continue until we have all stars
-            future = executor.submit(get_repo_stars_page, username, repo, page, headers_accept)
-            future_to_page[future] = page
+    page = 1
+    while True:
+        results = get_repo_stars_page(username, repo, page, headers_accept)
+        if not results:  # No more results on this page
+            break
             
-            if len(future_to_page) >= 10:  # Max 10 concurrent requests
-                done, _ = concurrent.futures.wait(future_to_page, return_when=concurrent.futures.FIRST_COMPLETED)
-                for future in done:
-                    results = future.result()
-                    if not results:  # No more results on this page
-                        continue
-                    starred_at.extend(results)
-                    del future_to_page[future]
-            
-            page += 1
-            time.sleep(0.1)  # Small delay between spawning requests
-            
+        starred_at.extend(results)
+        page += 1
+        
     return starred_at
 
 # Plot stars over time
