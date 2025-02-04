@@ -18,6 +18,8 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 from functools import lru_cache
+from datetime import datetime, timedelta
+from typing import List, Dict, Optional, Tuple
 
 st.set_page_config(
     page_title="GitHub Star History",
@@ -57,7 +59,7 @@ def make_conditional_request(url: str, headers: Dict) -> requests.Response:
         headers = headers.copy()
         headers['If-None-Match'] = etag
     
-    response = requests.get(url, headers=headers)
+    response = make_github_request(url, headers=headers)
     
     if response.status_code == 304:  # Not Modified
         return response
@@ -105,6 +107,10 @@ else:
         GITHUB_AUTH_TOKEN = os.environ['GITHUB_AUTH_TOKEN']
     else:
         GITHUB_AUTH_TOKEN = None
+
+# Create headers and rate limiter
+headers = {'Authorization': f'token {GITHUB_AUTH_TOKEN}'} if GITHUB_AUTH_TOKEN else {}
+rate_limiter = GitHubRateLimiter(headers=headers, safety_buffer=1500)
 
 query_params = st.query_params
 print("query_params:", query_params)
@@ -275,7 +281,7 @@ def get_repo_stars_page(username: str, repo: str, page: int, headers_accept: Dic
     retry_delay = 1
     
     for attempt in range(max_retries):
-        r = requests.get(url, headers=headers_accept)
+        r = make_github_request(url, headers=headers_accept)
         
         try:
             data = r.json()
