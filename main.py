@@ -194,6 +194,8 @@ else:
 # Create headers and rate limiter
 headers = {'Authorization': f'token {GITHUB_AUTH_TOKEN}'} if GITHUB_AUTH_TOKEN else {}
 rate_limiter = GitHubRateLimiter(headers=headers, safety_buffer=1500)
+# Initialize rate limit stats
+rate_limiter.get_rate_limit_info()
 
 query_params = st.query_params
 print("query_params:", query_params)
