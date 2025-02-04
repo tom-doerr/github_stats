@@ -39,12 +39,36 @@ class GitHubRateLimiter:
         if now - self._last_check > self._check_interval:
             r = requests.get('https://api.github.com/rate_limit', headers=self.headers)
             data = r.json()
-            
+        
             self.remaining = data['rate']['remaining']
             self.limit = data['rate']['limit']
             self.reset_time = datetime.fromtimestamp(data['rate']['reset'])
             self._last_check = now
-            
+        
+            # Calculate stats
+            reset_in = (self.reset_time - datetime.now()).total_seconds() / 60
+            stats = {
+                "remaining": self.remaining,
+                "limit": self.limit,
+                "reset_in_mins": reset_in,
+                "requests_this_hour": len(self.requests_this_hour),
+                "target_rate": self.max_requests_per_hour/3600,
+                "min_seconds_between": self.min_seconds_between_requests
+            }
+        
+            # Print to console
+            print(f"\nGitHub API Rate Limit Stats:")
+            print(f"  Remaining: {stats['remaining']}/{stats['limit']} requests")
+            print(f"  Reset in: {stats['reset_in_mins']:.1f} minutes")
+            print(f"  Requests this hour: {stats['requests_this_hour']}")
+            print(f"  Target rate: {stats['target_rate']:.1f} requests/second")
+            print(f"  Min seconds between requests: {stats['min_seconds_between']:.2f}")
+        
+            # Update session state
+            if 'rate_limit_stats' not in st.session_state:
+                st.session_state.rate_limit_stats = {}
+            st.session_state.rate_limit_stats = stats
+        
         return self.remaining, self.limit, self.reset_time
 
     def wait_if_needed(self) -> None:
@@ -174,6 +198,18 @@ rate_limiter = GitHubRateLimiter(headers=headers, safety_buffer=1500)
 query_params = st.query_params
 print("query_params:", query_params)
 
+
+# Display rate limit stats in sidebar if available
+if 'rate_limit_stats' in st.session_state:
+    stats = st.session_state.rate_limit_stats
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### GitHub API Stats")
+    st.sidebar.text(f"Remaining: {stats['remaining']}/{stats['limit']}")
+    st.sidebar.text(f"Reset in: {stats['reset_in_mins']:.1f} min")
+    st.sidebar.text(f"Requests this hour: {stats['requests_this_hour']}")
+    st.sidebar.text(f"Target rate: {stats['target_rate']:.1f} req/s")
+    st.sidebar.text(f"Min delay: {stats['min_seconds_between']:.2f}s")
+    st.sidebar.markdown("---")
 
 # Get user's repo names from Github API
 username_default = query_params.get('username', '') 
