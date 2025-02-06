@@ -3,3 +3,4 @@ numpy>=1.26.3
 pandas>=2.1.4
 streamlit>=1.30.0
 plotly>=5.18.0
+orjson>=3.6.4
